@@ -9,8 +9,9 @@
     "newArchEnabled": true,
     "backgroundColor": "#1F1913",
     "splash": {
+      "image": "./assets/acilis.png",
       "backgroundColor": "#1F1913",
-      "resizeMode": "contain"
+      "resizeMode": "cover"
     },
     "ios": {
       "supportsTablet": true,
@@ -18,12 +19,14 @@
       "infoPlist": {
         "CFBundleDisplayName": "NafuTabu",
         "UIRequiresFullScreen": false
-      }
+      },
+      "icon": "./assets/ikon.png"
     },
     "android": {
       "package": "com.mfatihtuz.nafutabu",
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
+        "foregroundImage": "./assets/uyarlanabilir.png",
         "backgroundColor": "#1F1913"
       }
     },
@@ -34,13 +37,15 @@
       [
         "expo-splash-screen",
         {
+          "image": "./assets/acilis.png",
           "backgroundColor": "#1F1913",
-          "resizeMode": "contain"
+          "resizeMode": "cover"
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "icon": "./assets/ikon.png"
   }
 }

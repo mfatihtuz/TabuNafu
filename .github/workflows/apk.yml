@@ -1,0 +1,60 @@
+# Telefona kurulabilir APK uretir.
+#
+# GEREKLI: EXPO_TOKEN adinda bir depo sirri.
+# Nasil alinacagi KURULUM.md icinde anlatiliyor.
+#
+# Calistirmak icin: GitHub > Actions > "APK Uret" > Run workflow
+name: APK Uret
+
+on:
+  workflow_dispatch:
+    inputs:
+      profil:
+        description: 'EAS build profili'
+        required: true
+        default: 'onizleme'
+        type: choice
+        options: ['onizleme', 'yayin']
+
+jobs:
+  apk:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: EXPO_TOKEN var mi
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "::error::EXPO_TOKEN sirri tanimli degil."
+            echo "::error::KURULUM.md dosyasindaki 2. adimi uygulayin."
+            exit 1
+          fi
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Bagimliliklari kur
+        run: npm ci
+
+      - name: APK uret ve bekle
+        run: eas build --platform android --profile ${{ inputs.profil }} --non-interactive --wait
+
+      - name: Indirme baglantisini yaz
+        run: |
+          echo "### APK hazir" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          eas build:list --platform android --limit 1 --json --non-interactive \
+            | node -e "
+              let g='';process.stdin.on('data',d=>g+=d).on('end',()=>{
+                const b=JSON.parse(g)[0];
+                console.log('Durum: '+b.status);
+                if(b.artifacts&&b.artifacts.buildUrl) console.log('Indir: '+b.artifacts.buildUrl);
+              });" >> $GITHUB_STEP_SUMMARY

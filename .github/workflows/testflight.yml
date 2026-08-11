@@ -1,0 +1,51 @@
+# iOS derlemesi ve TestFlight'a gonderim.
+#
+# GEREKLI: EXPO_TOKEN sirri + Apple Developer hesabi.
+# Ilk calistirmada EAS sertifikalari kendisi uretir, bunun icin
+# Apple kimlik bilgilerini bir kez yerelde girmeniz gerekir.
+# Ayrinti KURULUM.md icinde.
+name: TestFlight
+
+on:
+  workflow_dispatch:
+    inputs:
+      gonder:
+        description: 'Derledikten sonra TestFlight a gonderilsin mi'
+        required: true
+        default: 'hayir'
+        type: choice
+        options: ['hayir', 'evet']
+
+jobs:
+  ios:
+    name: iOS derleme
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: EXPO_TOKEN var mi
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "::error::EXPO_TOKEN sirri tanimli degil. KURULUM.md 2. adim."
+            exit 1
+          fi
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Bagimliliklari kur
+        run: npm ci
+
+      - name: iOS derle
+        run: eas build --platform ios --profile onizleme --non-interactive --wait
+
+      - name: TestFlight a gonder
+        if: ${{ inputs.gonder == 'evet' }}
+        run: eas submit --platform ios --latest --non-interactive

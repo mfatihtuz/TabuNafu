@@ -1,0 +1,45 @@
+# Her gonderimde otomatik calisir. Hicbir sir gerektirmez.
+# Amaci: bozuk bir sey gonderildiginde hemen haber vermek.
+name: Kontrol
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  kontrol:
+    name: Tip, test, kelime ve paket kontrolu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Bagimliliklari kur
+        run: npm ci
+
+      - name: Tip kontrolu
+        run: npx tsc --noEmit
+
+      - name: Birim testleri
+        run: npm test
+
+      - name: Kelime verisi CSV ile senkron mu
+        run: |
+          npm run build:words
+          git diff --exit-code assets/kelimeler/ \
+            || (echo "::error::assets/kelimeler guncel degil. 'npm run build:words' calistirip gonderin." && exit 1)
+
+      - name: Kelime kalite kapisi
+        run: npm run validate:words
+
+      - name: Android paketi derleniyor mu
+        run: npx expo export --platform android --output-dir /tmp/paket-android
+
+      - name: iOS paketi derleniyor mu
+        run: npx expo export --platform ios --output-dir /tmp/paket-ios
