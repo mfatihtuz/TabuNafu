@@ -1,0 +1,82 @@
+[
+  {
+    "kimlik": "cografya",
+    "kart": 10
+  },
+  {
+    "kimlik": "din",
+    "kart": 10
+  },
+  {
+    "kimlik": "edebiyat",
+    "kart": 10
+  },
+  {
+    "kimlik": "fen",
+    "kart": 10
+  },
+  {
+    "kimlik": "genel",
+    "kart": 12
+  },
+  {
+    "kimlik": "gunluk",
+    "kart": 10
+  },
+  {
+    "kimlik": "hobi",
+    "kart": 10
+  },
+  {
+    "kimlik": "kultur",
+    "kart": 10
+  },
+  {
+    "kimlik": "meslek",
+    "kart": 10
+  },
+  {
+    "kimlik": "muzik",
+    "kart": 10
+  },
+  {
+    "kimlik": "populer",
+    "kart": 9
+  },
+  {
+    "kimlik": "saglik",
+    "kart": 10
+  },
+  {
+    "kimlik": "seyahat",
+    "kart": 10
+  },
+  {
+    "kimlik": "sinema",
+    "kart": 7
+  },
+  {
+    "kimlik": "spor",
+    "kart": 10
+  },
+  {
+    "kimlik": "takimlar",
+    "kart": 10
+  },
+  {
+    "kimlik": "tarih",
+    "kart": 10
+  },
+  {
+    "kimlik": "teknoloji",
+    "kart": 9
+  },
+  {
+    "kimlik": "turkiye",
+    "kart": 8
+  },
+  {
+    "kimlik": "yemek",
+    "kart": 9
+  }
+]

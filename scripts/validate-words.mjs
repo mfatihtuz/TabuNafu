@@ -1,11 +1,11 @@
 /**
  * Kelime kalite kapisi.
  *
- * Prototipteki ornek kartlari (ve ilerde icerik/kelimeler/*.csv dosyalarini)
- * denetler. Amac: 5.350 kartin hicbirinde sessiz kalite kaybi olmasin.
+ * Kaynak: icerik/kelimeler/*.csv
+ * Amac: 5.350 kartin hicbirinde sessiz kalite kaybi olmasin.
  *
- * Kontroller:
- *   1  Her kartta tam olarak 5 yasakli kelime
+ * KONTROLLER
+ *   1  Her kartta tam olarak 5 yasakli kelime, hicbiri bos degil
  *   2  Ana kelime kendi yasakli listesinde yok
  *   3  Yasakli kelime ana kelimenin govdesini icermiyor (KITAP -> KITAPLIK red)
  *   4  Ana kelime TUM kategorilerde global tekil
@@ -15,15 +15,25 @@
  *   8  Tumu buyuk harf (Turkce kurallarina gore)
  *   9  Zorluk 1-5 araliginda
  *  10  Zorluk dagilimi hedefe yakin (%10/%35/%35/%15/%5)
+ *  11  Uretilen JSON kaynak CSV ile senkron
+ *  12  Kategori basina asgari kart (--kesin bayragiyla)
  *
- * Calistirma:  node scripts/validate-words.mjs
+ * Kullanim
+ *   node scripts/validate-words.mjs           uyari modu, eksik kart hata degil
+ *   node scripts/validate-words.mjs --kesin   asgari kart sayisi da zorunlu
  */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
+
+import { csvAyristir } from './build-words.mjs';
 
 const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
+const KAYNAK_KLASOR = join(KOK, 'icerik', 'kelimeler');
+const JSON_KLASOR = join(KOK, 'assets', 'kelimeler');
+
+const KESIN = process.argv.includes('--kesin');
 
 const ANA_UZUNLUK = 18;
 const YASAKLI_UZUNLUK = 14;
@@ -31,59 +41,58 @@ const YASAKLI_UZUNLUK = 14;
 const GECERLI_HARF = /^[A-ZÂÇĞİÎÖŞÜÛ0-9 ]+$/;
 const HEDEF_DAGILIM = { 1: 10, 2: 35, 3: 35, 4: 15, 5: 5 };
 
-/** Turkce'ye ozel buyuk harf. JS toUpperCase() 'i' harfini 'I' yapar, bu yanlis. */
+/** Kategori basina hedef kart sayisi. Genel digerlerinden fazla. */
+const HEDEF_KART = { genel: 600 };
+const VARSAYILAN_HEDEF = 250;
+
+/** Turkce'ye ozel buyuk harf. JS toUpperCase() 'i' harfini 'I' yapar. */
 function trUpper(metin) {
-  return metin
-    .replace(/i/g, 'İ')
-    .replace(/ı/g, 'I')
-    .toUpperCase();
+  let cikti = '';
+  for (const harf of metin) {
+    cikti += harf === 'i' ? 'İ' : harf === 'ı' ? 'I' : harf.toUpperCase();
+  }
+  return cikti;
 }
 
 /**
- * Turkce govde benzerligi. Ekler soyulup kok karsilastirilir.
- * KITAP <-> KITAPLIK yakalanir, ama KAR <-> KARTAL yakalanmaz (kok cok kisa).
+ * Turkce govde benzerligi. KITAP <-> KITAPLIK yakalanir,
+ * ama KAR <-> KARTAL yakalanmaz (kok cok kisa kalir).
  */
 function govdeCakisiyorMu(ana, yasakli) {
   const a = ana.replace(/\s/g, '');
   const y = yasakli.replace(/\s/g, '');
   if (a.length < 4 || y.length < 4) return false;
-  const kisa = Math.min(a.length, y.length);
-  const kok = Math.max(4, Math.floor(kisa * 0.75));
+  const kok = Math.max(4, Math.floor(Math.min(a.length, y.length) * 0.75));
   return a.slice(0, kok) === y.slice(0, kok);
 }
 
-/** Prototip HTML'inden KARTLAR sozlugunu cikarir. */
-function prototiptenOku() {
-  const html = readFileSync(join(KOK, 'tasarim', 'prototip.html'), 'utf-8');
-  const bas = html.indexOf('const KARTLAR = {');
-  if (bas < 0) throw new Error('KARTLAR bulunamadi');
-  const govdeBas = html.indexOf('{', bas);
-  let derinlik = 0, son = govdeBas;
-  for (let i = govdeBas; i < html.length; i++) {
-    if (html[i] === '{') derinlik++;
-    else if (html[i] === '}') { derinlik--; if (derinlik === 0) { son = i + 1; break; } }
-  }
-  return Function('"use strict";return ' + html.slice(govdeBas, son))();
-}
-
-const kartlar = prototiptenOku();
 const hatalar = [];
 const uyarilar = [];
 const globalAna = new Map();
 const zorlukSayaci = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+const kategoriSayilari = [];
 let toplamKart = 0;
 
-for (const [kategori, liste] of Object.entries(kartlar)) {
-  liste.forEach((kart, sira) => {
-    toplamKart++;
-    const yer = `${kategori}[${sira}]`;
-    const ana = kart[0];
-    const yasaklilar = kart.slice(1, 6);
-    const zorluk = kart[6];
+const dosyalar = readdirSync(KAYNAK_KLASOR).filter((d) => d.endsWith('.csv')).sort();
+if (dosyalar.length === 0) {
+  console.error('icerik/kelimeler icinde CSV yok.');
+  process.exit(1);
+}
 
-    // 1  Tam 5 yasakli
-    if (kart.length !== 7) {
-      hatalar.push(`${yer} "${ana}": ${kart.length - 2} yasakli kelime, 5 olmali`);
+for (const dosya of dosyalar) {
+  const kategori = basename(dosya, '.csv');
+  const { kartlar } = csvAyristir(readFileSync(join(KAYNAK_KLASOR, dosya), 'utf-8'));
+  kategoriSayilari.push({ kategori, adet: kartlar.length });
+
+  for (const kart of kartlar) {
+    toplamKart++;
+    const yer = `${dosya}:${kart.satirNo}`;
+    const { kelime: ana, yasaklilar, zorluk } = kart;
+
+    // 1  Tam 5 yasakli, hicbiri bos
+    const dolu = yasaklilar.filter((y) => y && y.length > 0);
+    if (dolu.length !== 5) {
+      hatalar.push(`${yer} "${ana}": ${dolu.length} yasakli kelime, 5 olmali`);
     }
 
     // 2  Ana kelime kendi listesinde
@@ -92,8 +101,8 @@ for (const [kategori, liste] of Object.entries(kartlar)) {
     }
 
     // 3  Govde cakismasi
-    for (const y of yasaklilar) {
-      if (y && govdeCakisiyorMu(ana, y)) {
+    for (const y of dolu) {
+      if (govdeCakisiyorMu(ana, y)) {
         hatalar.push(`${yer} "${ana}": yasakli "${y}" ayni govdeden`);
       }
     }
@@ -106,8 +115,7 @@ for (const [kategori, liste] of Object.entries(kartlar)) {
     }
 
     // 5  Kart ici tekrar
-    const tekil = new Set(yasaklilar);
-    if (tekil.size !== yasaklilar.length) {
+    if (new Set(dolu).size !== dolu.length) {
       hatalar.push(`${yer} "${ana}": yasakli kelimeler kendi arasinda tekrar ediyor`);
     }
 
@@ -115,15 +123,14 @@ for (const [kategori, liste] of Object.entries(kartlar)) {
     if (ana.length > ANA_UZUNLUK) {
       hatalar.push(`${yer} "${ana}": ana kelime ${ana.length} karakter, en fazla ${ANA_UZUNLUK}`);
     }
-    for (const y of yasaklilar) {
-      if (y && y.length > YASAKLI_UZUNLUK) {
+    for (const y of dolu) {
+      if (y.length > YASAKLI_UZUNLUK) {
         hatalar.push(`${yer} "${ana}": yasakli "${y}" ${y.length} karakter, en fazla ${YASAKLI_UZUNLUK}`);
       }
     }
 
     // 7 + 8  Karakter kumesi ve buyuk harf
-    for (const kelime of [ana, ...yasaklilar]) {
-      if (!kelime) continue;
+    for (const kelime of [ana, ...dolu]) {
       if (!GECERLI_HARF.test(kelime)) {
         hatalar.push(`${yer}: "${kelime}" gecersiz karakter iceriyor`);
       }
@@ -138,41 +145,85 @@ for (const [kategori, liste] of Object.entries(kartlar)) {
     } else {
       zorlukSayaci[zorluk]++;
     }
-  });
+  }
 }
 
 console.log('\nKelime kalite kapisi\n');
-console.log(`  ${Object.keys(kartlar).length} kategori, ${toplamKart} kart, `
-          + `${toplamKart * 6} kelime denetlendi\n`);
+console.log(`  ${dosyalar.length} kategori, ${toplamKart} kart, ` +
+            `${toplamKart * 6} kelime denetlendi\n`);
+
+// 12  Kategori doluluk
+console.log('  Kategori doluluk');
+let eksikToplam = 0;
+for (const { kategori, adet } of kategoriSayilari) {
+  const hedef = HEDEF_KART[kategori] ?? VARSAYILAN_HEDEF;
+  const oran = adet / hedef;
+  const dolu = Math.round(oran * 18);
+  const cubuk = '#'.repeat(Math.min(18, dolu)).padEnd(18, '.');
+  const tam = adet >= hedef;
+  if (!tam) eksikToplam += hedef - adet;
+  console.log(`   ${tam ? ' ' : '!'} ${kategori.padEnd(12)} ${cubuk} ` +
+              `${String(adet).padStart(4)}/${hedef}`);
+  if (!tam) {
+    const mesaj = `${kategori}: ${adet}/${hedef} kart (${hedef - adet} eksik)`;
+    (KESIN ? hatalar : uyarilar).push(mesaj);
+  }
+}
+if (eksikToplam > 0) {
+  console.log(`\n     Toplam ${eksikToplam} kart eksik` +
+              (KESIN ? '' : '  (uyari modu, --kesin ile hata olur)'));
+}
 
 // 10  Zorluk dagilimi
-console.log('  Zorluk dagilimi (hedef -> gercek)');
-const ETIKET = { 1:'cok kolay', 2:'kolay', 3:'orta', 4:'zor', 5:'cok zor' };
+console.log('\n  Zorluk dagilimi (hedef -> gercek)');
+const ETIKET = { 1: 'cok kolay', 2: 'kolay', 3: 'orta', 4: 'zor', 5: 'cok zor' };
 for (const seviye of [1, 2, 3, 4, 5]) {
-  const yuzde = (zorlukSayaci[seviye] / toplamKart) * 100;
+  const yuzde = toplamKart ? (zorlukSayaci[seviye] / toplamKart) * 100 : 0;
   const hedef = HEDEF_DAGILIM[seviye];
   const sapma = Math.abs(yuzde - hedef);
   const cubuk = '#'.repeat(Math.round(yuzde / 2)).padEnd(20, '.');
-  const im = sapma <= 12 ? ' ' : '!';
-  console.log(`   ${im} ${seviye} ${ETIKET[seviye].padEnd(10)} ${cubuk} `
-            + `%${yuzde.toFixed(0).padStart(2)} (hedef %${hedef})`);
+  console.log(`   ${sapma <= 12 ? ' ' : '!'} ${seviye} ${ETIKET[seviye].padEnd(10)} ` +
+              `${cubuk} %${yuzde.toFixed(0).padStart(2)} (hedef %${hedef})`);
   if (sapma > 12) {
     uyarilar.push(`Zorluk ${seviye} (${ETIKET[seviye]}): %${yuzde.toFixed(0)}, hedef %${hedef}`);
   }
 }
 
+// 11  JSON senkron mu
 console.log('');
+const senkronsuz = [];
+for (const dosya of dosyalar) {
+  const kategori = basename(dosya, '.csv');
+  const jsonYol = join(JSON_KLASOR, `${kategori}.json`);
+  if (!existsSync(jsonYol)) {
+    senkronsuz.push(`${kategori}: JSON uretilmemis`);
+    continue;
+  }
+  const { kartlar } = csvAyristir(readFileSync(join(KAYNAK_KLASOR, dosya), 'utf-8'));
+  const uretilen = JSON.parse(readFileSync(jsonYol, 'utf-8'));
+  const beklenen = kartlar.map((k) => [k.kelime, ...k.yasaklilar, k.zorluk]);
+  if (JSON.stringify(uretilen) !== JSON.stringify(beklenen)) {
+    senkronsuz.push(`${kategori}: JSON kaynak CSV ile ayrismis`);
+  }
+}
+if (senkronsuz.length) {
+  hatalar.push(...senkronsuz, 'Cozum: npm run build:words');
+  console.log('  JSON senkron degil');
+} else {
+  console.log('  JSON kaynak CSV ile senkron');
+}
+
 if (uyarilar.length) {
-  console.log('  UYARI');
-  uyarilar.forEach(u => console.log('    ' + u));
-  console.log('');
+  console.log('\n  UYARI');
+  uyarilar.forEach((u) => console.log('    ' + u));
 }
 
 if (hatalar.length) {
-  console.log(`  ${hatalar.length} HATA\n`);
-  hatalar.forEach(h => console.log('    ' + h));
+  console.log(`\n  ${hatalar.length} HATA\n`);
+  hatalar.slice(0, 40).forEach((h) => console.log('    ' + h));
+  if (hatalar.length > 40) console.log(`    ... ve ${hatalar.length - 40} tane daha`);
   console.log('');
   process.exit(1);
 }
 
-console.log('  Tum kontroller gecti.\n');
+console.log('\n  Tum kontroller gecti.\n');
