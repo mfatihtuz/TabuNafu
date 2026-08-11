@@ -1,0 +1,54 @@
+/**
+ * Golgeler ve derinlik.
+ *
+ * "Hafif 3D" icin gercek 3D motor kullanilmiyor - pil yakar. Bunun
+ * yerine katmanli golge, perspektif donusumu ve basili-derinlik
+ * efekti kullaniliyor.
+ */
+
+import { Platform } from 'react-native';
+import { RENK } from './renkler';
+
+/** Kartin masaya oturmus hissi. */
+export const KART_GOLGE = Platform.select({
+  ios: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.55,
+    shadowRadius: 26,
+  },
+  android: { elevation: 16 },
+  default: {},
+});
+
+/** Butonun altindaki sabit kalinlik - basilinca kaybolur. */
+export function butonDerinlik(renk: string, yukseklik = 6) {
+  return {
+    borderBottomWidth: yukseklik,
+    borderBottomColor: renk,
+  };
+}
+
+export const PANEL = {
+  backgroundColor: RENK.yuzey,
+  borderWidth: 1.5,
+  borderColor: RENK.cizgi,
+  borderRadius: 20,
+} as const;
+
+export const YARICAP = {
+  kucuk: 12,
+  orta: 15,
+  normal: 20,
+  buyuk: 26,
+  tam: 999,
+} as const;
+
+export const BOSLUK = {
+  minik: 4,
+  kucuk: 8,
+  notr: 12,
+  orta: 16,
+  buyuk: 22,
+  devasa: 32,
+} as const;
