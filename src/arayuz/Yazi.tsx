@@ -45,10 +45,22 @@ export function Yazi({
     fontFamily: AILE[tur],
     fontSize: boyut,
     color: renk,
-    // Turkce kuyruklar (S, C, G) kirpilmasin diye satir yuksekligi bol
-    lineHeight: boyut * satir,
     textAlign: ortala ? 'center' : 'auto',
   };
+
+  /**
+   * lineHeight ile adjustsFontSizeToFit birlikte kullanilamaz.
+   *
+   * iOS metni kucultunce lineHeight sabit kalir, yazi kendi satir
+   * kutusuna sigmaz ve TAMAMEN GORUNMEZ olur. Ilk cihaz testinde
+   * kartin ana kelimesi bu yuzden kayboldu.
+   *
+   * Kucultme acikken satir yuksekligini isletim sistemine birakiyoruz.
+   */
+  if (!kalan.adjustsFontSizeToFit) {
+    // Turkce kuyruklar (S, C, G) kirpilmasin diye satir yuksekligi bol
+    temel.lineHeight = boyut * satir;
+  }
   if (harfAraligi !== undefined) temel.letterSpacing = harfAraligi;
 
   return (

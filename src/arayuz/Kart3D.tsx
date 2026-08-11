@@ -1,12 +1,18 @@
 /**
  * Oyun karti.
  *
- * "Hafif 3D" burada uc parcadan olusuyor:
- *   1  Kart hafifce geriye yatik durur (rotateX)
- *   2  Katmanli golge masaya oturmus hissi verir
- *   3  Yeni kelimede Y ekseninde cevrilir
+ * DERINLIK NASIL VERILIYOR
+ * Ilk surumde perspective + rotateY ile gercek bir cevirme animasyonu
+ * vardi. Web prototipinde guzel calisiyordu ama React Native'de ayni
+ * degil: kart yamuluyor, ekran disina tasiyor ve animasyon ortasinda
+ * takili kalabiliyor. Ilk cihaz testinde tam olarak bu oldu.
  *
- * Gercek 3D motor kullanilmiyor - pil yakar ve bu his icin gereksiz.
+ * Yerine daha saglam bir yol secildi:
+ *   - Katmanli golge kartin masaya oturdugu hissini verir
+ *   - Pirinc ust bant kalinlik hissi verir
+ *   - Yeni kelimede kart hafifce buyuyup solarak degisir
+ *
+ * Ayni "hafif 3D" hissi, kirilganlik yok.
  *
  * Kart fildisi, metin neredeyse siyah. Sebep: denetci anlatanin
  * omzunun ustunden, acili ve uzaktan bakiyor. Kontrast 16.4:1.
@@ -24,7 +30,7 @@ import Animated, {
 
 import { KART_GOLGE, YARICAP } from '../tema/golgeler';
 import { RENK } from '../tema/renkler';
-import { BOYUT, SATIR } from '../tema/yazitipi';
+import { BOYUT } from '../tema/yazitipi';
 import { Yazi } from './Yazi';
 
 type Ozellikler = {
@@ -50,21 +56,23 @@ export function Kart3D({
   pasTuruMu = false,
   cevirmeAnahtari,
 }: Ozellikler) {
-  const cevirme = useSharedValue(0);
+  // 0 = yerinde duruyor, 1 = degisim aninin ortasi
+  const gecis = useSharedValue(0);
 
   useEffect(() => {
-    cevirme.value = withSequence(
-      withTiming(1, { duration: 200 }),
-      withTiming(0, { duration: 220 }),
+    // Ilk kartta animasyon oynatma, dogrudan yerinde dursun
+    if (cevirmeAnahtari === 0) return;
+    gecis.value = withSequence(
+      withTiming(1, { duration: 150 }),
+      withTiming(0, { duration: 210 }),
     );
-  }, [cevirmeAnahtari, cevirme]);
+  }, [cevirmeAnahtari, gecis]);
 
   const govdeStil = useAnimatedStyle(() => ({
+    opacity: interpolate(gecis.value, [0, 1], [1, 0.15]),
     transform: [
-      { perspective: 1200 },
-      { rotateX: '4deg' },
-      { rotateY: `${interpolate(cevirme.value, [0, 1], [0, -84])}deg` },
-      { scale: interpolate(cevirme.value, [0, 1], [1, 0.9]) },
+      { scale: interpolate(gecis.value, [0, 1], [1, 0.94]) },
+      { translateY: interpolate(gecis.value, [0, 1], [0, 10]) },
     ],
   }));
 
@@ -104,10 +112,10 @@ export function Kart3D({
           tur="baslik"
           boyut={anaBoyut(kelime)}
           renk={RENK.metinAna}
-          satir={SATIR.sik}
           ortala
           numberOfLines={2}
           adjustsFontSizeToFit
+          minimumFontScale={0.6}
           style={durum.anaKelime}
         >
           {kelime}
@@ -122,10 +130,10 @@ export function Kart3D({
               tur="cokKalin"
               boyut={BOYUT.buyuk}
               renk={RENK.metinAlt}
-              satir={SATIR.normal}
               ortala
               numberOfLines={1}
               adjustsFontSizeToFit
+              minimumFontScale={0.7}
             >
               {y}
             </Yazi>
@@ -162,7 +170,9 @@ const durum = StyleSheet.create({
   },
   // Rozet varken ana kelime asagi kayar, ustuste binmez
   icRozetli: { paddingTop: 48 },
-  anaKelime: { paddingVertical: 14 },
+  // Satir yuksekligi isletim sistemine birakildi (adjustsFontSizeToFit),
+  // Turkce kuyruklar icin payi kutu veriyor
+  anaKelime: { paddingTop: 16, paddingBottom: 18, minHeight: 74 },
   ayrac: {
     height: 2.5,
     borderRadius: 2,

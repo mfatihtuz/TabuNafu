@@ -7,7 +7,7 @@
 
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle,
@@ -26,10 +26,24 @@ import { BOSLUK, PANEL, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
 import { BOYUT } from '../../src/tema/yazitipi';
 
+const YAN_BOSLUK = 22;
+const IZGARA_BOSLUK = 11;
+const SUTUN = 3;
+
 export default function KategoriEkrani() {
   const yonlendir = useRouter();
   const kenar = useSafeAreaInsets();
+  const { width: ekranGenisligi } = useWindowDimensions();
   const kategoriSec = oyunDeposu((d) => d.kategoriSec);
+
+  /**
+   * Kutucuk genisligi olcerek hesaplanir, yuzdeyle degil.
+   * Yuzde kullanilinca 402px ekranda toplam 2.3px tasiyor ve ucuncu
+   * kutucuk alt satira dusuyordu - ilk cihaz testinde iki sutun gorunuyordu.
+   */
+  const kutucukGenisligi = Math.floor(
+    (ekranGenisligi - YAN_BOSLUK * 2 - IZGARA_BOSLUK * (SUTUN - 1)) / SUTUN,
+  );
 
   // Kart sayilari her cizimde yeniden hesaplanmasin
   const sayilar = useMemo(() => {
@@ -61,6 +75,7 @@ export default function KategoriEkrani() {
               key={k.kimlik}
               kategori={k}
               adet={sayilar[k.kimlik] ?? 0}
+              genislik={kutucukGenisligi}
               onPress={() => sec(k.kimlik)}
             />
           ))}
@@ -86,10 +101,12 @@ export default function KategoriEkrani() {
 function Kutucuk({
   kategori,
   adet,
+  genislik,
   onPress,
 }: {
   kategori: Kategori;
   adet: number;
+  genislik: number;
   onPress: () => void;
 }) {
   const olcek = useSharedValue(1);
@@ -102,7 +119,7 @@ function Kutucuk({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${kategori.ad}, ${adet} kart`}
-      style={durum.kutucukSar}
+      style={{ width: genislik }}
     >
       <Animated.View style={[durum.kutucuk, stil]}>
         <Yazi tur="cokKalin" boyut={BOYUT.minik - 1} renk={RENK.sis} style={durum.rozet}>
@@ -125,14 +142,13 @@ function Kutucuk({
 }
 
 const durum = StyleSheet.create({
-  kok: { flex: 1, paddingHorizontal: 22 },
+  kok: { flex: 1, paddingHorizontal: YAN_BOSLUK },
   aciklama: { marginTop: 6, marginBottom: BOSLUK.orta },
   izgara: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 11,
+    gap: IZGARA_BOSLUK,
   },
-  kutucukSar: { width: '31.5%' },
   kutucuk: {
     ...PANEL,
     aspectRatio: 1,

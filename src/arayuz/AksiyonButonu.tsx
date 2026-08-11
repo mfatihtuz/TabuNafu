@@ -6,6 +6,12 @@
  * basmis hissi verir, gorsel sus degil - dokunusun kaydedildigini
  * anlatir.
  *
+ * Ilk surumde bu etki borderBottomWidth'i canlandirarak yapiliyordu.
+ * Kenarlik bir yerlesim ozelligi - her karede kutu yeniden olculuyor,
+ * cihazda butonun bir an kaybolmasina yol acabiliyor. Simdi disarida
+ * sabit renkli bir "taban" var, buton onun icinde translateY ile
+ * asagi kayiyor. Hicbir yerlesim ozelligi canlandirilmiyor.
+ *
  * Pas hakki bitince veya son kart modunda buton kilit ikonuna doner.
  */
 
@@ -24,6 +30,9 @@ import { BOYUT } from '../tema/yazitipi';
 import { Yazi } from './Yazi';
 
 export type AksiyonTipi = 'yanlis' | 'pas' | 'dogru';
+
+/** Butonun asagi inebilecegi mesafe - yuvanin gorunen kalinligi. */
+const DERINLIK = 5;
 
 const BICIM = {
   yanlis: {
@@ -74,8 +83,7 @@ export function AksiyonButonu({
   const bastirma = useSharedValue(0);
 
   const govdeStil = useAnimatedStyle(() => ({
-    transform: [{ translateY: bastirma.value * 4 }],
-    borderBottomWidth: 5 - bastirma.value * 4,
+    transform: [{ translateY: bastirma.value * DERINLIK }],
   }));
 
   function basildi() {
@@ -101,47 +109,58 @@ export function AksiyonButonu({
       accessibilityState={{ disabled: kilitli }}
       style={durum.dokunmaAlani}
     >
-      <Animated.View
-        style={[
-          durum.govde,
-          { backgroundColor: bicim.zemin, borderBottomColor: bicim.alt },
-          kilitli && durum.kilitli,
-          govdeStil,
-        ]}
-      >
-        <View
-          style={[
-            durum.daire,
-            { backgroundColor: kilitli ? '#6B5A44' : bicim.daire },
-          ]}
+      <View style={[durum.taban, kilitli && durum.kilitli]}>
+        <View style={[durum.kalinlik, { backgroundColor: bicim.alt }]} />
+        <Animated.View
+          style={[durum.govde, { backgroundColor: bicim.zemin }, govdeStil]}
         >
-          <Ikon
-            ad={kilitli ? 'lock' : bicim.ikon}
-            boyut={26}
-            renk={kilitli ? '#2A2015' : bicim.ikonRenk}
-            cizgiKalinligi={3}
-          />
-        </View>
-        <Yazi tur="cokKalin" boyut={BOYUT.minik} renk={RENK.sis} harfAraligi={1.1}>
-          {bicim.etiket}
-        </Yazi>
-        <Yazi tur="cokKalin" boyut={BOYUT.orta} renk={bicim.sayacRenk}>
-          {sayac}
-        </Yazi>
-      </Animated.View>
+          <View
+            style={[
+              durum.daire,
+              { backgroundColor: kilitli ? '#6B5A44' : bicim.daire },
+            ]}
+          >
+            <Ikon
+              ad={kilitli ? 'lock' : bicim.ikon}
+              boyut={26}
+              renk={kilitli ? '#2A2015' : bicim.ikonRenk}
+              cizgiKalinligi={3}
+            />
+          </View>
+          <Yazi tur="cokKalin" boyut={BOYUT.minik} renk={RENK.sis} harfAraligi={1.1}>
+            {bicim.etiket}
+          </Yazi>
+          <Yazi tur="cokKalin" boyut={BOYUT.orta} renk={bicim.sayacRenk}>
+            {sayac}
+          </Yazi>
+        </Animated.View>
+      </View>
     </Pressable>
   );
 }
 
 const durum = StyleSheet.create({
   dokunmaAlani: { flex: 1 },
+  // Butonun oturdugu yuva. Alt boslugu kadar kalinlik gorunur.
+  taban: {
+    borderRadius: YARICAP.normal,
+    paddingBottom: DERINLIK,
+    overflow: 'hidden',
+  },
+  // Yuvanin gorunen kalinligi. Buton basilinca ustune iner.
+  kalinlik: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: DERINLIK,
+  },
   govde: {
     alignItems: 'center',
     gap: BOSLUK.minik + 2,
     paddingTop: 13,
     paddingBottom: 10,
     borderRadius: YARICAP.normal,
-    borderBottomWidth: 5,
     // Dokunma hedefi Apple ve Google esigi olan 44px'in uzerinde
     minHeight: 106,
   },

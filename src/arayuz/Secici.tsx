@@ -53,10 +53,19 @@ export function Secici({
         </View>
       </View>
 
+      {/*
+        Ray ekranin tam genisliginde akar, ic bosluk contentContainer'da.
+        Boylece kaydirirken pullar ekran kenarinda yarim kesik durmaz -
+        ilk cihaz testinde solda yarim bir pul goze batiyordu.
+      */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={durum.rayDis}
         contentContainerStyle={durum.ray}
+        // Secili degeri gorunur tutmak icin en yakin pula yaslanir
+        snapToAlignment="center"
+        decelerationRate="fast"
       >
         {secenekler.map((s) => (
           <Pul
@@ -121,7 +130,10 @@ const durum = StyleSheet.create({
     justifyContent: 'space-between',
   },
   degerAlani: { flexDirection: 'row', alignItems: 'baseline' },
-  ray: { gap: BOSLUK.kucuk, paddingVertical: 4, paddingHorizontal: 2 },
+  // Ekranin yan boslugunu asarak kenara kadar uzanir
+  rayDis: { marginHorizontal: -22 },
+  // Ic bosluk burada: ilk ve son pul kenara yapismaz
+  ray: { gap: BOSLUK.kucuk, paddingVertical: 4, paddingHorizontal: 22 },
   pul: {
     minWidth: 58,
     // Dokunma hedefi 44px esiginin uzerinde

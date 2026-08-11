@@ -10,7 +10,7 @@
 
 import { useKeepAwake } from 'expo-keep-awake';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
@@ -51,8 +51,20 @@ export default function TurEkrani() {
   const turuBitir = oyunDeposu((d) => d.turuBitir);
   const olayTemizle = oyunDeposu((d) => d.olayTemizle);
 
-  const kartSayaci = useRef(0);
-  const bildirim = useRef<string | null>(null);
+  /**
+   * Bunlar ref degil state olmali. Ref degisimi yeniden cizim
+   * tetiklemedigi icin kart animasyonu ve bildirim guvenilmez
+   * calisiyordu - deger ancak bir sonraki cizimde okunuyordu.
+   */
+  const [kartSayaci, setKartSayaci] = useState(0);
+  const [bildirim, setBildirim] = useState<string | null>(null);
+
+  // Bildirim birkac saniye sonra kaybolur
+  useEffect(() => {
+    if (!bildirim) return;
+    const z = setTimeout(() => setBildirim(null), 2800);
+    return () => clearTimeout(z);
+  }, [bildirim]);
 
   // Saniye zamanlayicisi
   useEffect(() => {
@@ -66,11 +78,11 @@ export default function TurEkrani() {
 
     switch (sonOlay.tur) {
       case 'kartDegisti':
-        kartSayaci.current += 1;
+        setKartSayaci((n) => n + 1);
         break;
       case 'pasTuruBasladi':
-        kartSayaci.current += 1;
-        bildirim.current = `Pas geçilen ${sonOlay.kartSayisi} kelime tekrar geliyor`;
+        setKartSayaci((n) => n + 1);
+        setBildirim(`Pas geçilen ${sonOlay.kartSayisi} kelime tekrar geliyor`);
         sesCal('pas', ayarlar.sesAcik);
         break;
       case 'sonKartBasladi':
@@ -126,19 +138,19 @@ export default function TurEkrani() {
               yasaklilar={kart.yasaklilar}
               sonKartMi={sayac.sonKartModuAktif}
               pasTuruMu={deste?.pasTuruAktif ?? false}
-              cevirmeAnahtari={kartSayaci.current}
+              cevirmeAnahtari={kartSayaci}
             />
           ) : null}
         </View>
 
-        {bildirim.current && deste?.pasTuruAktif ? (
+        {bildirim && deste?.pasTuruAktif ? (
           <Animated.View
             entering={FadeInDown.duration(280)}
             exiting={FadeOut.duration(200)}
             style={durum.bildirim}
           >
             <Yazi tur="cokKalin" boyut={BOYUT.kucuk + 0.5} renk={RENK.sariUstu}>
-              {bildirim.current}
+              {bildirim}
             </Yazi>
           </Animated.View>
         ) : null}
