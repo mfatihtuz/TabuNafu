@@ -1,0 +1,19 @@
+{
+  "cli": { "version": ">= 12.0.0", "appVersionSource": "remote" },
+  "build": {
+    "gelistirme": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "onizleme": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "ios": { "simulator": false }
+    },
+    "yayin": {
+      "autoIncrement": true,
+      "android": { "buildType": "app-bundle" }
+    }
+  },
+  "submit": { "yayin": {} }
+}

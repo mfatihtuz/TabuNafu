@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "NafuTabu",
+    "slug": "nafutabu",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "nafutabu",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "backgroundColor": "#1F1913",
+    "splash": {
+      "backgroundColor": "#1F1913",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mfatihtuz.nafutabu",
+      "infoPlist": {
+        "CFBundleDisplayName": "NafuTabu",
+        "UIRequiresFullScreen": false
+      }
+    },
+    "android": {
+      "package": "com.mfatihtuz.nafutabu",
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "backgroundColor": "#1F1913"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-audio",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1F1913",
+          "resizeMode": "contain"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
