@@ -23,7 +23,8 @@ scripts/                 üretim ve doğrulama araçları
 ## Komutlar
 
 ```bash
-python3 scripts/build-sounds.py      # ses efektlerini sıfırdan sentezle
+python3 scripts/build-sounds.py      # marimba ses ailesini üret
+python3 scripts/test-ses.py          # ses doğrulaması
 python3 scripts/build-prototip.py    # prototipi tek dosyaya derle
 node scripts/validate-words.mjs      # kelime kalite kapısı
 node scripts/test-prototip.mjs       # tarayıcıda tam akış testi
@@ -74,15 +75,30 @@ DOĞRU   #12A150     YANLIŞ  #E01E37     PAS     #F5A524
 Kart metni kontrastı 16.4:1, yasaklı kelimeler 7.5:1. İkisi de WCAG AAA.
 Omuz üstünden bakan denetçi rahatça okur.
 
-**Ses: Kenney Interface Sounds (CC0).** Sesler sentezlenmiyor, tek bir açık kaynak
-paketten alınıyor — böylece hepsi aynı stüdyodan çıkmış gibi tutarlı.
+**Ses: Marimba ailesi.** Bütün sesler tek çalgıdan üretiliyor, bu yüzden aralarında
+stil uyumsuzluğu olması yapısal olarak imkânsız. Anlam farkı çalgı değiştirerek değil,
+**perde, aralık ve çalış tekniğiyle** veriliyor — gerçek bir perküsyoncunun yapacağı gibi.
 
-Seçim kulakla değil ölçümle yapıldı (`scripts/analiz-ses.py`): her adayın süresi,
-parlaklığı (spektral merkez), perde yönü ve gürültülülüğü ölçülüp role eşlendi.
-Doğru için yükselen ve parlak, yanlış için boğuk ve ağır bir ses seçildi.
+```
+doğru      F5·A5·C6 yükselen majör, çan tınılı tokmak
+yanlış     G3·Eb3 alçalan ağır ikili, bas marimba
+pas        D5 tek nötr nota, melodik yön taşımaz
+tik        A6 çok kısa tiz tap
+geri sayım A4 yumuşak orta nota
+başla      C5·G5·C6 yükselen üçlü
+korna      A3+E3 tremolo rulo, kapanış vuruşu
+son kart   hızlanan yükselen dizi
+```
 
-Ham pakette RMS 0.044 ile 0.31 arasında geziyordu, yani yedi kat ses farkı vardı.
-Hepsi yumuşak sınırlayıcıyla ortak seviyeye çekildi.
+Marimbayı ahşap yapan şey her kısmi tonun **farklı hızda** sönmesi: ana ton uzun sürer,
+üstteki tonlar çabuk kaybolur. Hepsine aynı zarf verilirse elektronik org duyulur.
+Model ayrıca tokmağın tahtaya çarpmasını, rezonatör borusunun içi boş tınısını ve
+vuruş anındaki kısa perde düşüşünü içeriyor.
+
+Doğrulama `scripts/test-ses.py` ile yapılıyor. Marimbanın 2. kısmi tonu tam 4x'te
+olduğu için otokorelasyonla perde takibi oktav hatası veriyor — bunun yerine beklenen
+frekanslara bakan Goertzel süzgeci kullanılıyor. Notaların tasarlanan sırayla girdiği,
+seviyelerin hedefte olduğu ve kırpma olmadığı ölçülüyor.
 
 **Türkçe büyük harf** iki yerde tuzak kuruyor ve ikisi de kapatıldı:
 CSS `text-transform` tarayıcı diline bakar, JS `toUpperCase()` ise `i` harfini
@@ -93,9 +109,7 @@ CSS `text-transform` tarayıcı diline bakar, JS `toUpperCase()` ise `i` harfini
 
 - İkonlar: [Lucide](https://lucide.dev) — ISC
 - Yazı tipleri: Baloo 2, Manrope — SIL Open Font License 1.1
-- Ses efektleri: [Kenney Interface Sounds](https://kenney.nl/assets/interface-sounds) — CC0 1.0
-  Atıf zorunlu değil, yine de teşekkürler Kenney.
-  Paketleyen: [Calinou/kenney-interface-sounds](https://github.com/Calinou/kenney-interface-sounds)
+- Ses efektleri: bu depoda marimba modeliyle üretildi, dış bağımlılık yok
 
 **Yazı tipi notu:** Başlık fontu Fredoka'dan Baloo 2'ye geçirildi. Fredoka'nın
 Ş çengeli ve İ noktası gövdeden çok daha ince çizilmiş, büyük puntoda göze batıyordu.

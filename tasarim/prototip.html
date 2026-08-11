@@ -736,7 +736,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
     <div class="ust-satir"><button class="geri" data-git="e-ana">%%chevron-left%% Geri</button></div>
     <h1 class="baslik">Sesler</h1>
     <p class="aciklama" style="margin:6px 0 16px">
-      Kenney'in CC0 arayüz setinden, tek pakettenler. A/B seçeneklerini karşılaştır, hangisini istersen söyle.
+      Hepsi tek çalgıdan: marimba. Anlam farkı perde, aralık ve çalış tekniğiyle veriliyor.
     </p>
     <div class="kaydir"><div class="ses-liste" id="ses-liste"></div></div>
   </section>
@@ -1855,18 +1855,14 @@ document.getElementById('kazanan-btn').addEventListener('click', () => {
 
 /* ================= SES TEZGAHI ================= */
 const SES_ACIKLAMA = [
-  ['dogru','Doğru — A','Yükselen parlak onay'],
-  ['dogru-b','Doğru — B','Daha kısa, tiz onay'],
-  ['yanlis','Yanlış — A','Boğuk, ağır ret'],
-  ['yanlis-b','Yanlış — B','Kısa ve keskin ret'],
-  ['pas','Pas — A','Nötr yumuşak tık'],
-  ['pas-b','Pas — B','Kuru kısa seçim'],
-  ['gerisayim','Geri Sayım','3·2·1 tonlu blip'],
-  ['basla','Başla','Yükselen başlangıç'],
-  ['tik','Tik','Son 10 saniye, kısık'],
-  ['korna','Korna — A','Süre doldu, uzun'],
-  ['korna-b','Korna — B','Süre doldu, kısa'],
-  ['sonkart','Son Kart','Keskin aciliyet']
+  ['dogru','Doğru','F5·A5·C6 yükselen majör, çan tınılı'],
+  ['yanlis','Yanlış','G3·Eb3 alçalan ağır ikili, bas marimba'],
+  ['pas','Pas','D5 tek nötr nota, yumuşak tokmak'],
+  ['gerisayim','Geri Sayım','A4 yumuşak orta nota'],
+  ['basla','Başla','C5·G5·C6 yükselen üçlü, parlak'],
+  ['tik','Tik','A6 çok kısa tiz tap'],
+  ['korna','Korna','A3+E3 tremolo rulo, kapanış vuruşu'],
+  ['sonkart','Son Kart','Hızlanan yükselen dizi']
 ];
 document.getElementById('ses-liste').innerHTML = SES_ACIKLAMA.map(([id, ad, ac]) => `
   <button class="ses-btn" data-ses="${id}"><b>${ad}</b><span>${ac}</span></button>`).join('');
