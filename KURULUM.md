@@ -4,13 +4,135 @@ Bu rehber **senin ne yapman gerektiğini** anlatır. Kod tarafındaki her şey
 hazır, GitHub Actions üzerinden otomatik çalışıyor. Senden istenen tek şey
 birkaç hesap açmak ve bir anahtar yapıştırmak.
 
-**En hızlı yol Android.** Bilgisayarına hiçbir şey kurmadan, sadece tarayıcıdan
-APK üretip telefonuna kurabilirsin. iPhone tarafı biraz daha uzun, çünkü Apple
-sertifika istiyor.
+---
+
+## ⚠️ Windows kullanıyorsan önce bunu yap
+
+PowerShell varsayılan olarak betik çalıştırmayı engelliyor. `npm` ve `npx`
+birer `.ps1` betiği olduğu için ikisi de şu hatayı verir:
+
+```
+npm : File C:\Program Files\nodejs\npm.ps1 cannot be loaded because
+running scripts is disabled on this system.
+```
+
+**Çözüm** — PowerShell'i aç ve şunu yaz:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+Onay sorduğunda **Y** yazıp Enter'a bas. Yönetici yetkisi gerekmez, sadece
+senin kullanıcın için geçerli olur ve bir kez yapılır.
+
+> `RemoteSigned` güvenli tarafta kalan ayardır: kendi bilgisayarındaki
+> betikler çalışır, internetten indirilenler imza ister.
+
+**Bunu yapmak istemiyorsan** alternatif olarak her komuta `.cmd` ekle:
+
+```powershell
+npm.cmd ci
+npx.cmd eas-cli login
+```
+
+Aynı işi görür. PowerShell `.cmd` dosyalarını engellemiyor.
 
 ---
 
-## Yol A — Android APK  (bilgisayara kurulum yok)
+## Yol A — iPhone / TestFlight
+
+Apple sertifika istediği için burada bilgisayarında **bir kez** komut
+çalıştırman gerekiyor. Derleme Apple'ın değil Expo'nun bulut sunucusunda
+olur, yani **Mac'e ihtiyacın yok**.
+
+### Ön koşullar
+
+- Apple Developer hesabı (yıllık 99 dolar) — sende var
+- Node 22 — https://nodejs.org adresinden **LTS** sürümü kur
+- Expo hesabı (ücretsiz) — https://expo.dev/signup
+- Windows'taysan yukarıdaki PowerShell ayarı
+
+### Adım 1 · Projeyi hazırla
+
+```powershell
+git clone https://github.com/mfatihtuz/TabuNafu.git
+cd TabuNafu
+git checkout claude/tabu-xl-mobile-game-d3dicr
+npm ci
+```
+
+> `npm ci` yaklaşık 590 paket indirir, birkaç dakika sürer.
+
+### Adım 2 · Expo hesabına gir
+
+```powershell
+npx eas-cli login
+```
+
+expo.dev'de açtığın hesabın e-postası ve şifresi sorulur.
+
+### Adım 3 · iOS derlemesini başlat
+
+```powershell
+npx eas-cli build --platform ios --profile onizleme
+```
+
+Sırayla şunlar sorulacak:
+
+| Soru | Cevabın |
+|---|---|
+| "Would you like to automatically create an EAS project?" | **Y** |
+| "Do you want to log in to your Apple account?" | **Y** |
+| Apple ID | Apple Developer hesabının e-postası |
+| Password | Apple hesap şifren |
+| İki adımlı doğrulama kodu | Telefonuna gelen 6 haneli kod |
+| Birden fazla Apple Team varsa | Developer hesabının olduğu takımı seç |
+| "Generate a new Apple Distribution Certificate?" | **Y** |
+| "Generate a new Apple Provisioning Profile?" | **Y** |
+
+Sonra derleme başlar, ~15-20 dakika sürer. Terminal bir bağlantı gösterir,
+oradan ilerlemeyi izleyebilirsin.
+
+> Sertifikalar bir kez üretilir ve Expo hesabında saklanır. Bir daha
+> sorulmaz.
+
+### Adım 4 · Değişen dosyayı geri gönder
+
+İlk derlemede EAS `app.json` dosyasına bir proje kimliği ekler. Bu kimlik
+GitHub Actions'ın da çalışması için gerekli:
+
+```powershell
+git add app.json
+git commit -m "EAS proje kimligi eklendi"
+git push
+```
+
+### Adım 5 · TestFlight'a gönder
+
+```powershell
+npx eas-cli submit --platform ios --latest
+```
+
+Apple'ın işlemesi 10-30 dakika sürer. Sonra:
+
+1. https://appstoreconnect.apple.com adresine gir
+2. **My Apps → NafuTabu → TestFlight**
+3. **Internal Testing** grubuna aile üyelerinin Apple ID e-postalarını ekle
+4. Onlara davet gider. App Store'dan **TestFlight** uygulamasını kurup
+   oyunu oradan indirirler
+
+### Bundan sonrası otomatik
+
+3. adımı bir kez yaptıktan sonra iOS derlemelerini GitHub'dan
+çalıştırabilirsin, bilgisayara gerek kalmaz. Bunun için `EXPO_TOKEN`
+secret'ını eklemen yeterli (aşağıda Yol B'nin 2. ve 3. adımı).
+
+Sonra: https://github.com/mfatihtuz/TabuNafu/actions/workflows/testflight.yml
+→ **Run workflow**
+
+---
+
+## Yol B — Android APK  (bilgisayara kurulum yok)
 
 Toplam süre: ilk sefer ~20 dakika, sonrakiler 2 dakika.
 
@@ -72,70 +194,6 @@ Bitti. Aileyle oynayabilirsin.
 
 ---
 
-## Yol B — iPhone / TestFlight
-
-Apple sertifika istediği için burada **bir kez** bilgisayarında bir komut
-çalıştırman gerekiyor. Sonrasında her şey yine GitHub'dan yürür.
-
-### Ön koşul
-
-- Apple Developer hesabı (yıllık 99 dolar) — sende var
-- Bilgisayarında Node 22 kurulu olması
-
-### Adım 1 · Node kur  *(bir kez)*
-
-- **Windows / Mac:** https://nodejs.org adresinden **LTS** sürümü indir, kur
-- Kurulumu doğrula: terminal açıp `node --version` yaz, `v22...` görmelisin
-
-### Adım 2 · Projeyi indir
-
-Terminalde (Windows'ta PowerShell, Mac'te Terminal):
-
-```bash
-git clone https://github.com/mfatihtuz/TabuNafu.git
-cd TabuNafu
-git checkout claude/tabu-xl-mobile-game-d3dicr
-npm ci
-```
-
-> `npm ci` biraz sürer, yaklaşık 600 paket iniyor.
-
-### Adım 3 · Apple sertifikalarını bir kez üret
-
-```bash
-npx eas-cli login
-npx eas-cli build --platform ios --profile onizleme
-```
-
-EAS sana sırayla soracak:
-
-| Soru | Ne yazacaksın |
-|---|---|
-| Apple ID | Apple Developer hesabının e-postası |
-| Şifre | Apple hesap şifren |
-| İki adımlı doğrulama kodu | Telefonuna gelen 6 haneli kod |
-| "Generate a new Apple Distribution Certificate?" | **Yes** |
-| "Generate a new Apple Provisioning Profile?" | **Yes** |
-
-Bunlar bir kez sorulur. EAS ürettiği sertifikaları kendi hesabında saklar,
-bir daha sormaz.
-
-### Adım 4 · Bundan sonrası GitHub'dan
-
-1. https://github.com/mfatihtuz/TabuNafu/actions/workflows/testflight.yml
-2. **Run workflow**
-3. `gonder` seçeneğini **evet** yaparsan TestFlight'a otomatik yüklenir
-
-### Adım 5 · TestFlight'a aileyi ekle
-
-1. https://appstoreconnect.apple.com adresine gir
-2. **My Apps → NafuTabu → TestFlight**
-3. **Internal Testing** grubuna aile üyelerinin Apple ID e-postalarını ekle
-4. Onlara davet gider, App Store'dan **TestFlight** uygulamasını kurup
-   oyunu oradan indirirler
-
----
-
 ## Yol C — Hızlı bakış  (derleme beklemeden)
 
 Sadece "çalışıyor mu" görmek istiyorsan, derleme beklemeden telefonunda
@@ -185,6 +243,10 @@ sürüm numarası, ikon, renkler — hepsi kodda tanımlı, dokunman gerekmiyor.
 ---
 
 ## Sık karşılaşılan sorunlar
+
+**PowerShell "running scripts is disabled" diyor**
+Rehberin en başındaki `Set-ExecutionPolicy` komutunu çalıştır, ya da
+komutlara `.cmd` ekle: `npm.cmd ci`
 
 **"EXPO_TOKEN sirri tanimli degil" hatası**
 3. adımı atlamışsın veya secret adını yanlış yazmışsın. Adı tam olarak
