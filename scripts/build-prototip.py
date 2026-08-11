@@ -25,8 +25,8 @@ CIKTI = os.path.join(KOK, "tasarim", "prototip-derli.html")
 SES_KLASORU = os.path.join(KOK, "assets", "ses")
 VARLIK_KLASORU = os.path.join(KOK, "tasarim", "varliklar")
 
-SES_ADLARI = ["dogru", "yanlis", "yanlis-b", "pas", "pas-b", "tik",
-              "gerisayim", "basla", "korna", "sonkart"]
+SES_ADLARI = ["dogru", "dogru-b", "yanlis", "yanlis-b", "pas", "pas-b",
+              "tik", "gerisayim", "basla", "korna", "korna-b", "sonkart"]
 
 
 def oku(yol):

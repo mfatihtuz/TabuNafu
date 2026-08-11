@@ -74,8 +74,15 @@ DOĞRU   #12A150     YANLIŞ  #E01E37     PAS     #F5A524
 Kart metni kontrastı 16.4:1, yasaklı kelimeler 7.5:1. İkisi de WCAG AAA.
 Omuz üstünden bakan denetçi rahatça okur.
 
-**Ses: Ahşap ve Pirinç.** Tüm efektler tek bir fiziksel dünyadan geliyor. Ahşap tokmak,
-tahtada taş kaydırma, marimba, pirinç korna. Hiçbiri "bip" değil.
+**Ses: Kenney Interface Sounds (CC0).** Sesler sentezlenmiyor, tek bir açık kaynak
+paketten alınıyor — böylece hepsi aynı stüdyodan çıkmış gibi tutarlı.
+
+Seçim kulakla değil ölçümle yapıldı (`scripts/analiz-ses.py`): her adayın süresi,
+parlaklığı (spektral merkez), perde yönü ve gürültülülüğü ölçülüp role eşlendi.
+Doğru için yükselen ve parlak, yanlış için boğuk ve ağır bir ses seçildi.
+
+Ham pakette RMS 0.044 ile 0.31 arasında geziyordu, yani yedi kat ses farkı vardı.
+Hepsi yumuşak sınırlayıcıyla ortak seviyeye çekildi.
 
 **Türkçe büyük harf** iki yerde tuzak kuruyor ve ikisi de kapatıldı:
 CSS `text-transform` tarayıcı diline bakar, JS `toUpperCase()` ise `i` harfini
@@ -85,5 +92,11 @@ CSS `text-transform` tarayıcı diline bakar, JS `toUpperCase()` ise `i` harfini
 ## Lisanslar
 
 - İkonlar: [Lucide](https://lucide.dev) — ISC
-- Yazı tipleri: Fredoka, Manrope — SIL Open Font License 1.1
-- Ses efektleri: bu depoda sıfırdan sentezlendi
+- Yazı tipleri: Baloo 2, Manrope — SIL Open Font License 1.1
+- Ses efektleri: [Kenney Interface Sounds](https://kenney.nl/assets/interface-sounds) — CC0 1.0
+  Atıf zorunlu değil, yine de teşekkürler Kenney.
+  Paketleyen: [Calinou/kenney-interface-sounds](https://github.com/Calinou/kenney-interface-sounds)
+
+**Yazı tipi notu:** Başlık fontu Fredoka'dan Baloo 2'ye geçirildi. Fredoka'nın
+Ş çengeli ve İ noktası gövdeden çok daha ince çizilmiş, büyük puntoda göze batıyordu.
+Baloo 2'nin Latin Extended çizimleri gövdeyle aynı ağırlıkta.

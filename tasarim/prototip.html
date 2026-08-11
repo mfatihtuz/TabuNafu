@@ -34,7 +34,7 @@ __FONTS__
   --sis:#B9A184;       /* ikincil metin, sicak tan */
   --cizgi:rgba(212,160,80,.22);
 
-  --d:'Fredoka',system-ui,sans-serif;
+  --d:'Baloo 2',system-ui,sans-serif;
   --g:'Manrope',system-ui,sans-serif;
   --r:20px;
 }
@@ -89,7 +89,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 @keyframes gir{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 
 /* ===== Tipografi ===== */
-.baslik{font-family:var(--d);font-weight:600;font-size:30px;line-height:1.24;letter-spacing:-.01em}
+.baslik{font-family:var(--d);font-weight:700;font-size:30px;line-height:1.24;letter-spacing:-.01em}
 .ustyazi{
   font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;
   color:var(--pirinc);
@@ -211,7 +211,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 /* ===== Ayarlar: kaydirmali secici ===== */
 .secici-blok{display:flex;flex-direction:column;gap:9px}
 .secici-ust{display:flex;align-items:baseline;justify-content:space-between}
-.secici-deger{font-family:var(--d);font-weight:600;font-size:27px;color:var(--pirinc);font-variant-numeric:tabular-nums}
+.secici-deger{font-family:var(--d);font-weight:700;font-size:27px;color:var(--pirinc);font-variant-numeric:tabular-nums}
 .secici-deger small{font-size:13px;font-weight:700;font-family:var(--g);color:var(--sis);margin-left:3px}
 
 .ray{
@@ -298,7 +298,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 .halka-sar svg{width:100%;height:100%;transform:rotate(-90deg)}
 .halka-yazi{
   position:absolute;inset:0;display:grid;place-items:center;
-  font-family:var(--d);font-weight:600;font-size:19px;color:var(--fildisi);
+  font-family:var(--d);font-weight:700;font-size:19px;color:var(--fildisi);
   font-variant-numeric:tabular-nums;
 }
 .halka-sar.acil .halka-yazi{color:var(--yanlis)}
@@ -427,7 +427,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 }
 .ozet-sayac-im{display:grid;place-items:center;height:19px}
 .ozet-sayac-im svg{width:17px;height:17px;stroke-width:3}
-.ozet-sayac b{font-family:var(--d);font-weight:600;font-size:21px;line-height:1.16;font-variant-numeric:tabular-nums}
+.ozet-sayac b{font-family:var(--d);font-weight:700;font-size:21px;line-height:1.16;font-variant-numeric:tabular-nums}
 .ozet-sayac span{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--sis)}
 
 .ozet-satir{
@@ -736,7 +736,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
     <div class="ust-satir"><button class="geri" data-git="e-ana">%%chevron-left%% Geri</button></div>
     <h1 class="baslik">Sesler</h1>
     <p class="aciklama" style="margin:6px 0 16px">
-      Hepsi Python ile sıfırdan sentezlendi. Uygulamada birebir bu dosyalar çalacak. Dinle ve söyle.
+      Kenney'in CC0 arayüz setinden, tek pakettenler. A/B seçeneklerini karşılaştır, hangisini istersen söyle.
     </p>
     <div class="kaydir"><div class="ses-liste" id="ses-liste"></div></div>
   </section>
@@ -1365,12 +1365,12 @@ function rayKur(kap, degerler, secili, birim, geriCagri){
       titret(8);
     }));
 }
-const sureler = []; for (let s = 30; s <= 150; s += 5) sureler.push(s);
-rayKur(document.getElementById('sure-ray'), sureler, 60, 'saniye', v => {
+const SURELER = [30, 45, 60, 75, 90, 120];
+rayKur(document.getElementById('sure-ray'), SURELER, 60, 'saniye', v => {
   ayarlar.sure = v;
   document.getElementById('sure-deger').innerHTML = v + '<small>saniye</small>';
 });
-rayKur(document.getElementById('pas-ray'), [0,1,2,3,4,5,6,7], 3, 'hak', v => {
+rayKur(document.getElementById('pas-ray'), [0, 1, 2, 3, 4, 5], 3, 'hak', v => {
   ayarlar.pasHakki = v;
   document.getElementById('pas-deger').innerHTML = v + '<small>hak</small>';
 });
@@ -1381,8 +1381,8 @@ function bitisRayCiz(){
     kap.innerHTML = '<p class="aciklama" style="padding:4px 0">Kazanan ilan edilmez. Siz bırakana kadar puan sayılır.</p>';
     return;
   }
-  const puanlar = [10,15,20,25,30,40,50,60];
-  const turlar = [3,4,5,6,7,8,10];
+  const puanlar = [10, 15, 20, 25, 30, 40];
+  const turlar  = [5, 7, 9, 11, 13, 15];
   const mod = ayarlar.bitisModu === 'puan';
   rayKur(kap, mod ? puanlar : turlar, mod ? ayarlar.hedefPuan : ayarlar.turSayisi, '',
     v => { mod ? ayarlar.hedefPuan = v : ayarlar.turSayisi = v; });
@@ -1855,16 +1855,18 @@ document.getElementById('kazanan-btn').addEventListener('click', () => {
 
 /* ================= SES TEZGAHI ================= */
 const SES_ACIKLAMA = [
-  ['dogru','Doğru','Marimba, yükselen üç nota'],
-  ['yanlis','Yanlış — A','Ahşap tokmak vuruşu'],
-  ['yanlis-b','Yanlış — B','Boğuk alçalan uğultu'],
-  ['pas','Pas — A','Tahtada taş kaydırma'],
-  ['pas-b','Pas — B','İki kuru tahta tık'],
-  ['gerisayim','Geri Sayım','3·2·1, yumuşak ve yuvarlak'],
-  ['basla','Başla','Yükselen ikili malet'],
+  ['dogru','Doğru — A','Yükselen parlak onay'],
+  ['dogru-b','Doğru — B','Daha kısa, tiz onay'],
+  ['yanlis','Yanlış — A','Boğuk, ağır ret'],
+  ['yanlis-b','Yanlış — B','Kısa ve keskin ret'],
+  ['pas','Pas — A','Nötr yumuşak tık'],
+  ['pas-b','Pas — B','Kuru kısa seçim'],
+  ['gerisayim','Geri Sayım','3·2·1 tonlu blip'],
+  ['basla','Başla','Yükselen başlangıç'],
   ['tik','Tik','Son 10 saniye, kısık'],
-  ['korna','Korna','Tur bitişi, pirinç akor'],
-  ['sonkart','Son Kart','Tremololu gergin ikili']
+  ['korna','Korna — A','Süre doldu, uzun'],
+  ['korna-b','Korna — B','Süre doldu, kısa'],
+  ['sonkart','Son Kart','Keskin aciliyet']
 ];
 document.getElementById('ses-liste').innerHTML = SES_ACIKLAMA.map(([id, ad, ac]) => `
   <button class="ses-btn" data-ses="${id}"><b>${ad}</b><span>${ac}</span></button>`).join('');
