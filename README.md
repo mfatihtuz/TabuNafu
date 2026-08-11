@@ -60,6 +60,28 @@ Zorluk dağılımı: %10 çok kolay · %35 kolay · %35 orta · %15 zor · %5 ç
 
 Kaynak format CSV (Excel'de düzenlenebilir), build adımında JSON'a çevrilir.
 
+## Tasarım
+
+**Tema: Okey Tahtası.** Oyunun dünyası bir Türk aile masası, palet de oradan geliyor:
+koyu ceviz zemin, fildişi okey taşı rengi kart, pirinç kaplama ve okey taşlarının
+dört rengi (kırmızı, mavi, sarı, yeşil).
+
+```
+CEVİZ   #1F1913     TAŞ     #F7F0E1     PİRİNÇ  #D4A050
+DOĞRU   #12A150     YANLIŞ  #E01E37     PAS     #F5A524
+```
+
+Kart metni kontrastı 16.4:1, yasaklı kelimeler 7.5:1. İkisi de WCAG AAA.
+Omuz üstünden bakan denetçi rahatça okur.
+
+**Ses: Ahşap ve Pirinç.** Tüm efektler tek bir fiziksel dünyadan geliyor. Ahşap tokmak,
+tahtada taş kaydırma, marimba, pirinç korna. Hiçbiri "bip" değil.
+
+**Türkçe büyük harf** iki yerde tuzak kuruyor ve ikisi de kapatıldı:
+CSS `text-transform` tarayıcı diline bakar, JS `toUpperCase()` ise `i` harfini
+`İ` değil `I` yapar. Metinler doğrudan doğru büyük harfle yazılıyor, kod tarafında
+`trUpper()` kullanılıyor.
+
 ## Lisanslar
 
 - İkonlar: [Lucide](https://lucide.dev) — ISC

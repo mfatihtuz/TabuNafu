@@ -9,23 +9,30 @@ __FONTS__
    Tek gorsel dunyaya bagli kalir (oyun ekrani), her renk acikca
    boyanir, hicbiri host temasindan miras alinmaz.
    --------------------------------------------------------------- */
+/* ---------------------------------------------------------------
+   Palet: OKEY TAHTASI
+
+   Oyunun dunyasi bir Turk aile masasi. Palet de oradan geliyor:
+   koyu ceviz tahta, fildisi okey tasi, pirinc kaplama ve okey
+   taslarinin canli renkleri.  Mor gradyan yok.
+   --------------------------------------------------------------- */
 :root{
-  --zemin-1:#1B0B3A;
-  --zemin-2:#3D1470;
-  --zemin-3:#2A1050;
-  --kart:#FFF8EC;
-  --kart-golge:#E8DCC8;
-  --metin-ana:#17102E;
-  --metin-alt:#4A3568;
-  --turkuaz:#17C3B2;
-  --turkuaz-koyu:#0E8C7F;
-  --dogru:#14C08A;
-  --yanlis:#FF3D5A;
-  --pas:#FFB020;
-  --magenta:#FF4FA3;
-  --fildisi:#FDF6E9;
-  --sis:#B9A6D9;
-  --cizgi:rgba(255,248,236,.16);
+  --zemin-1:#1F1913;   /* koyu ceviz, ust */
+  --zemin-2:#413221;   /* ceviz, alt */
+  --zemin-3:#2C2317;
+  --kart:#F7F0E1;      /* okey tasi fildisi */
+  --kart-golge:#DBCDB0;
+  --metin-ana:#17120A; /* sicak siyah */
+  --metin-alt:#5C4A33; /* koyu kahve */
+  --pirinc:#D4A050;    /* pirinc kaplama, kart bandi ve desen */
+  --yesil-koyu:#0A7038;
+  --dogru:#12A150;     /* okey yesili */
+  --yanlis:#E01E37;    /* okey kirmizisi */
+  --pas:#F5A524;       /* okey sarisi */
+  --magenta:#2E7FE0;   /* okey mavisi, vurgu */
+  --fildisi:#F5EADA;   /* koyu zeminde metin */
+  --sis:#B9A184;       /* ikincil metin, sicak tan */
+  --cizgi:rgba(212,160,80,.22);
 
   --d:'Fredoka',system-ui,sans-serif;
   --g:'Manrope',system-ui,sans-serif;
@@ -43,10 +50,10 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-:focus-visible{outline:3px solid var(--turkuaz);outline-offset:3px;border-radius:6px}
+:focus-visible{outline:3px solid var(--pirinc);outline-offset:3px;border-radius:6px}
 
 /* Cini kafes deseni - arka plan */
-#kafes{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none}
+#kafes{position:fixed;inset:0;z-index:0;opacity:.9;pointer-events:none}
 
 /* ===== Sayfa iskeleti ===== */
 .sayfa{position:relative;z-index:1;min-height:100dvh}
@@ -65,8 +72,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
   .duzen{padding:44px 40px 64px}
   .cihaz{
     min-height:0;height:880px;border-radius:44px;
-    border:1px solid rgba(255,248,236,.14);
-    box-shadow:0 50px 90px -30px rgba(0,0,0,.75),0 0 0 11px #0D0620,0 0 0 12px rgba(255,248,236,.09);
+    border:1px solid rgba(245,234,218,.14);
+    box-shadow:0 50px 90px -30px rgba(0,0,0,.75),0 0 0 11px #1A1208,0 0 0 12px rgba(245,234,218,.09);
     overflow:hidden;flex:0 0 auto;position:sticky;top:44px;
   }
   .panel{display:block;flex:1 1 460px;max-width:560px;padding-top:6px}
@@ -82,20 +89,20 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 @keyframes gir{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 
 /* ===== Tipografi ===== */
-.baslik{font-family:var(--d);font-weight:600;font-size:30px;line-height:1.1;letter-spacing:-.01em}
+.baslik{font-family:var(--d);font-weight:600;font-size:30px;line-height:1.24;letter-spacing:-.01em}
 .ustyazi{
   font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--turkuaz);
+  color:var(--pirinc);
 }
 .aciklama{font-size:14.5px;line-height:1.55;color:var(--sis)}
 
 /* ===== Ana ekran ===== */
 .marka{display:flex;flex-direction:column;align-items:center;gap:8px;margin:auto 0 8px}
 .logo{
-  font-family:var(--d);font-weight:700;font-size:50px;letter-spacing:-.025em;line-height:1;
-  background:linear-gradient(94deg,var(--turkuaz) 0%,var(--fildisi) 44%,var(--pas) 100%);
+  font-family:var(--d);font-weight:700;font-size:50px;letter-spacing:-.025em;line-height:1.16;
+  background:linear-gradient(94deg,var(--pirinc) 0%,var(--fildisi) 44%,var(--pas) 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 5px 20px rgba(23,195,178,.35));
+  filter:drop-shadow(0 5px 20px rgba(212,160,80,.35));
 }
 .logo-alt{
   font-size:12px;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--sis);
@@ -105,7 +112,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
   box-shadow:0 16px 34px -10px rgba(0,0,0,.6);margin-bottom:16px;
   transform:rotate(-7deg);animation:sallan 5.5s ease-in-out infinite;
 }
-.logo-kart::before{content:"";position:absolute;inset:0 0 auto;height:16px;background:var(--turkuaz);border-radius:12px 12px 0 0}
+.logo-kart::before{content:"";position:absolute;inset:0 0 auto;height:16px;background:var(--pirinc);border-radius:12px 12px 0 0}
 .logo-kart i{position:absolute;left:11px;right:11px;height:5px;border-radius:3px;background:#DCCDB4}
 .logo-kart i:nth-child(1){top:32px;background:var(--metin-ana);height:8px;right:26px}
 .logo-kart i:nth-child(2){top:50px}
@@ -124,12 +131,12 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 }
 .btn svg{width:20px;height:20px;flex:0 0 auto}
 .btn-ana{
-  background:linear-gradient(178deg,#1FD8C5,var(--turkuaz-koyu));color:#04231F;
-  box-shadow:0 6px 0 #0A6B61,0 16px 30px -10px rgba(23,195,178,.6);
+  background:linear-gradient(178deg,#1BC768,var(--yesil-koyu));color:#04250F;
+  box-shadow:0 6px 0 #0A6B3A,0 16px 30px -10px rgba(212,160,80,.6);
 }
-.btn-ana:active{transform:translateY(5px);box-shadow:0 1px 0 #0A6B61,0 6px 14px -8px rgba(23,195,178,.5)}
+.btn-ana:active{transform:translateY(5px);box-shadow:0 1px 0 #0A6B3A,0 6px 14px -8px rgba(212,160,80,.5)}
 .btn-ikinci{
-  background:rgba(255,248,236,.07);color:var(--fildisi);border:1.5px solid var(--cizgi);
+  background:rgba(245,234,218,.07);color:var(--fildisi);border:1.5px solid var(--cizgi);
   box-shadow:0 4px 0 rgba(0,0,0,.28);
 }
 .btn-ikinci:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
@@ -140,27 +147,28 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
   padding:8px 12px 8px 6px;margin-left:-6px;border-radius:12px;align-self:flex-start;
 }
 .geri svg{width:17px;height:17px}
-.geri:active{background:rgba(255,248,236,.08)}
+.geri:active{background:rgba(245,234,218,.08)}
 
 .ust-satir{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
 
 /* ===== Takim kurulumu ===== */
 .kaydir{flex:1;overflow-y:auto;overflow-x:hidden;margin:0 -22px;padding:0 22px 4px;-webkit-overflow-scrolling:touch}
+.kaydir.ortala{display:flex;flex-direction:column;justify-content:center;gap:0}
 .yigin{display:flex;flex-direction:column;gap:14px}
 
 .takim-kart{
-  border-radius:var(--r);padding:14px;background:rgba(255,248,236,.06);
+  border-radius:var(--r);padding:14px;background:rgba(245,234,218,.06);
   border:1.5px solid var(--cizgi);display:flex;flex-direction:column;gap:11px;
 }
 .takim-ust{display:flex;align-items:center;gap:11px}
 .renk-nokta{width:34px;height:34px;border-radius:11px;flex:0 0 auto;box-shadow:inset 0 -3px 0 rgba(0,0,0,.28)}
 .girdi{
-  flex:1;min-width:0;background:rgba(13,6,32,.5);border:1.5px solid var(--cizgi);
+  flex:1;min-width:0;background:rgba(16,12,7,.5);border:1.5px solid var(--cizgi);
   color:var(--fildisi);font:inherit;font-weight:700;font-size:15.5px;
   padding:11px 13px;border-radius:13px;
 }
 .girdi::placeholder{color:#7C6B99;font-weight:500}
-.girdi:focus{outline:none;border-color:var(--turkuaz);background:rgba(13,6,32,.75)}
+.girdi:focus{outline:none;border-color:var(--pirinc);background:rgba(16,12,7,.75)}
 .girdi.kucuk{font-size:14px;padding:9px 12px;font-weight:600}
 
 .oyuncu-liste{display:flex;flex-direction:column;gap:7px;padding-left:45px}
@@ -173,27 +181,27 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 /* Toggle */
 .toggle-satir{
   display:flex;align-items:center;justify-content:space-between;gap:14px;
-  padding:15px 16px;border-radius:var(--r);background:rgba(255,248,236,.06);
+  padding:15px 16px;border-radius:var(--r);background:rgba(245,234,218,.06);
   border:1.5px solid var(--cizgi);cursor:pointer;width:100%;text-align:left;
 }
 .toggle-metin{display:flex;flex-direction:column;gap:3px;min-width:0}
 .toggle-metin b{font-size:15px;font-weight:800}
 .toggle-metin span{font-size:12.5px;color:var(--sis);line-height:1.4}
 .toggle{
-  width:52px;height:31px;border-radius:16px;background:rgba(13,6,32,.75);position:relative;
+  width:52px;height:31px;border-radius:16px;background:rgba(16,12,7,.75);position:relative;
   flex:0 0 auto;transition:background .22s;border:1.5px solid var(--cizgi);
 }
 .toggle::after{
   content:"";position:absolute;top:2.5px;left:2.5px;width:23px;height:23px;border-radius:50%;
   background:var(--sis);transition:transform .26s cubic-bezier(.3,1.4,.5,1),background .22s;
 }
-.toggle.acik{background:var(--turkuaz-koyu);border-color:var(--turkuaz)}
+.toggle.acik{background:var(--yesil-koyu);border-color:var(--pirinc)}
 .toggle.acik::after{transform:translateX(21px);background:var(--fildisi)}
 
 /* Sayi secici (kisi sayisi, takim sayisi) */
 .adet{display:flex;align-items:center;gap:9px}
 .adet button{
-  width:31px;height:31px;border-radius:10px;background:rgba(255,248,236,.1);
+  width:31px;height:31px;border-radius:10px;background:rgba(245,234,218,.1);
   display:grid;place-items:center;border:1.5px solid var(--cizgi);
 }
 .adet button svg{width:15px;height:15px}
@@ -203,7 +211,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 /* ===== Ayarlar: kaydirmali secici ===== */
 .secici-blok{display:flex;flex-direction:column;gap:9px}
 .secici-ust{display:flex;align-items:baseline;justify-content:space-between}
-.secici-deger{font-family:var(--d);font-weight:600;font-size:27px;color:var(--turkuaz);font-variant-numeric:tabular-nums}
+.secici-deger{font-family:var(--d);font-weight:600;font-size:27px;color:var(--pirinc);font-variant-numeric:tabular-nums}
 .secici-deger small{font-size:13px;font-weight:700;font-family:var(--g);color:var(--sis);margin-left:3px}
 
 .ray{
@@ -213,31 +221,31 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 .ray::-webkit-scrollbar{display:none}
 .pul{
   flex:0 0 auto;scroll-snap-align:center;min-width:56px;padding:12px 4px;border-radius:15px;
-  background:rgba(255,248,236,.06);border:1.5px solid var(--cizgi);
+  background:rgba(245,234,218,.06);border:1.5px solid var(--cizgi);
   font-weight:800;font-size:15.5px;text-align:center;font-variant-numeric:tabular-nums;
   transition:transform .2s cubic-bezier(.3,1.5,.5,1),background .18s,border-color .18s,color .18s;
   color:var(--sis);
 }
 .pul.secili{
-  background:linear-gradient(178deg,#1FD8C5,var(--turkuaz-koyu));color:#04231F;
+  background:linear-gradient(178deg,#1BC768,var(--yesil-koyu));color:#04250F;
   border-color:transparent;transform:scale(1.13);
-  box-shadow:0 8px 20px -6px rgba(23,195,178,.6);
+  box-shadow:0 8px 20px -6px rgba(212,160,80,.6);
 }
 .pul.kilit{opacity:.42}
 
 /* Segment */
-.segment{display:flex;gap:5px;padding:5px;border-radius:16px;background:rgba(13,6,32,.55);border:1.5px solid var(--cizgi)}
+.segment{display:flex;gap:5px;padding:5px;border-radius:16px;background:rgba(16,12,7,.55);border:1.5px solid var(--cizgi)}
 .segment button{
   flex:1;padding:11px 7px;border-radius:12px;font-weight:800;font-size:13.5px;color:var(--sis);
   transition:background .2s,color .2s;
 }
-.segment button.secili{background:var(--turkuaz);color:#04231F}
+.segment button.secili{background:var(--pirinc);color:#04250F}
 
 /* ===== Kategori izgarasi ===== */
 .kategori-izgara{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
 .kutucuk{
   position:relative;aspect-ratio:1;border-radius:19px;overflow:hidden;
-  background:rgba(255,248,236,.07);border:1.5px solid var(--cizgi);
+  background:rgba(245,234,218,.07);border:1.5px solid var(--cizgi);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
   padding:9px 5px;transition:transform .16s cubic-bezier(.3,1.3,.5,1);
 }
@@ -258,8 +266,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 }
 .kutucuk.karisik{
   grid-column:span 3;aspect-ratio:auto;flex-direction:row;gap:14px;padding:15px 18px;justify-content:flex-start;
-  background:linear-gradient(100deg,rgba(255,79,163,.2),rgba(23,195,178,.16));
-  border-color:rgba(255,79,163,.45);
+  background:linear-gradient(100deg,rgba(46,127,224,.2),rgba(212,160,80,.16));
+  border-color:rgba(46,127,224,.45);
 }
 .kutucuk.karisik .disk{width:44px;height:44px}
 .kutucuk.karisik span{font-size:15px;text-align:left}
@@ -268,14 +276,14 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 /* ===== Sira ekrani ===== */
 .sira-orta{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
 .sira-takim{
-  font-family:var(--d);font-weight:700;font-size:38px;line-height:1.1;text-wrap:balance;
+  font-family:var(--d);font-weight:700;font-size:38px;line-height:1.22;text-wrap:balance;
 }
 .sira-rozet{
   padding:8px 18px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.13em;
   text-transform:uppercase;
 }
 .gerisayim{
-  font-family:var(--d);font-weight:700;font-size:130px;line-height:1;color:var(--turkuaz);
+  font-family:var(--d);font-weight:700;font-size:130px;line-height:1;color:var(--pirinc);
   animation:nabizBuyuk .95s cubic-bezier(.2,.8,.3,1);font-variant-numeric:tabular-nums;
 }
 @keyframes nabizBuyuk{0%{transform:scale(.4);opacity:0}40%{transform:scale(1.1);opacity:1}100%{transform:scale(1);opacity:.9}}
@@ -318,10 +326,10 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
   49%{opacity:1}
   100%{transform:rotateX(4deg) rotateY(0) scale(1)}
 }
-.kart.sonkart{box-shadow:0 0 0 4px var(--yanlis),0 26px 50px -16px rgba(0,0,0,.72),0 0 44px -6px rgba(255,61,90,.6)}
+.kart.sonkart{box-shadow:0 0 0 4px var(--yanlis),0 26px 50px -16px rgba(0,0,0,.72),0 0 44px -6px rgba(224,30,55,.6)}
 
 .kart-bant{
-  height:13px;background:var(--turkuaz);flex:0 0 auto;position:relative;
+  height:13px;background:var(--pirinc);flex:0 0 auto;position:relative;
 }
 .kart.sonkart .kart-bant{background:var(--yanlis)}
 .kart-ic{flex:1;display:flex;flex-direction:column;padding:20px 20px 22px;min-height:0}
@@ -330,11 +338,11 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
   position:absolute;top:26px;left:50%;transform:translateX(-50%);
   background:var(--yanlis);color:#fff;font-size:10px;font-weight:800;letter-spacing:.16em;
   padding:5px 13px;border-radius:999px;text-transform:uppercase;white-space:nowrap;
-  box-shadow:0 5px 14px -3px rgba(255,61,90,.7);
+  box-shadow:0 5px 14px -3px rgba(224,30,55,.7);
 }
 .kart-rozet.pas-turu{
   background:var(--pas);color:#3A2400;
-  box-shadow:0 5px 14px -3px rgba(255,176,32,.7);
+  box-shadow:0 5px 14px -3px rgba(245,165,36,.7);
 }
 /* Son kart rozeti pas turu rozetinin ustune biner, ikisi ayni anda gorunur */
 .kart.sonkart .kart-rozet.pas-turu{top:auto;bottom:18px}
@@ -355,8 +363,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 
 .kart-ana{
   font-family:var(--d);font-weight:600;color:var(--metin-ana);
-  font-size:clamp(30px,8.6vw,44px);line-height:1.06;text-align:center;
-  padding:14px 0 15px;word-break:break-word;hyphens:auto;text-wrap:balance;
+  font-size:clamp(30px,8.6vw,44px);line-height:1.2;text-align:center;
+  padding:14px 0 17px;word-break:break-word;hyphens:auto;text-wrap:balance;
 }
 .kart-ana.uzun{font-size:clamp(24px,6.6vw,34px)}
 .kart-ana.cokuzun{font-size:clamp(20px,5.2vw,27px)}
@@ -369,7 +377,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 }
 .kart-yasakli li{
   list-style:none;color:var(--metin-alt);font-weight:800;
-  font-size:clamp(15px,4.4vw,20px);letter-spacing:.005em;text-align:center;line-height:1.15;
+  font-size:clamp(15px,4.4vw,20px);letter-spacing:.005em;text-align:center;line-height:1.32;
 }
 
 /* Aksiyon butonlari */
@@ -388,53 +396,68 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 .aksiyon .sayac{
   font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;
 }
-.a-yanlis{background:rgba(255,61,90,.13);box-shadow:0 5px 0 rgba(255,61,90,.3)}
+.a-yanlis{background:rgba(224,30,55,.13);box-shadow:0 5px 0 rgba(224,30,55,.3)}
 .a-yanlis .yuvarlak{background:var(--yanlis);color:#fff}
 .a-yanlis .sayac{color:var(--yanlis)}
-.a-pas{background:rgba(255,176,32,.13);box-shadow:0 5px 0 rgba(255,176,32,.3)}
+.a-pas{background:rgba(245,165,36,.13);box-shadow:0 5px 0 rgba(245,165,36,.3)}
 .a-pas .yuvarlak{background:var(--pas);color:#3A2400}
 .a-pas .sayac{color:var(--pas)}
-.a-dogru{background:rgba(20,192,138,.13);box-shadow:0 5px 0 rgba(20,192,138,.3)}
-.a-dogru .yuvarlak{background:var(--dogru);color:#02261A}
+.a-dogru{background:rgba(18,161,80,.13);box-shadow:0 5px 0 rgba(18,161,80,.3)}
+.a-dogru .yuvarlak{background:var(--dogru);color:#04250F}
 .a-dogru .sayac{color:var(--dogru)}
 .aksiyon:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
 .aksiyon.kilitli{opacity:.4;pointer-events:none}
 .aksiyon.kilitli .yuvarlak{background:#6B5A88;color:#241A38}
 
-/* ===== Tur ozeti ===== */
+/* ===== Tur ozeti =====
+   Uc kademeli belirginlik: puan > takim farki > sayaclar */
+.ozet-tepe{display:flex;flex-direction:column;align-items:center;gap:2px;padding:18px 0 22px}
 .ozet-puan{
-  display:flex;align-items:baseline;justify-content:center;gap:10px;
-  font-family:var(--d);font-weight:700;font-size:64px;line-height:1;
+  display:flex;align-items:baseline;justify-content:center;gap:9px;
+  font-family:var(--d);font-weight:700;font-size:76px;line-height:1.16;
   font-variant-numeric:tabular-nums;
 }
+.ozet-puan-birim{font-family:var(--g);font-size:17px;font-weight:800;color:var(--sis)}
+.ozet-takim{font-size:15px;font-weight:800;color:var(--fildisi);margin-top:2px}
+
+.ozet-sayaclar{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:16px}
+.ozet-sayac{
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:13px 6px 11px;
+  border-radius:15px;background:rgba(245,234,218,.05);border:1.5px solid var(--cizgi);
+}
+.ozet-sayac-im{display:grid;place-items:center;height:19px}
+.ozet-sayac-im svg{width:17px;height:17px;stroke-width:3}
+.ozet-sayac b{font-family:var(--d);font-weight:600;font-size:21px;line-height:1.16;font-variant-numeric:tabular-nums}
+.ozet-sayac span{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--sis)}
+
 .ozet-satir{
   display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:14px;
-  background:rgba(255,248,236,.055);border:1.5px solid var(--cizgi);
+  background:rgba(245,234,218,.055);border:1.5px solid var(--cizgi);
 }
 .ozet-satir .im{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:0 0 auto}
 .ozet-satir .im svg{width:15px;height:15px;stroke-width:3.2}
-.ozet-satir b{flex:1;font-size:15px;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.im-dogru{background:var(--dogru);color:#02261A}
+.ozet-satir b{flex:1;font-size:15px;font-weight:800;min-width:0}
+.im-dogru{background:var(--dogru);color:#04250F}
 .im-yanlis{background:var(--yanlis);color:#fff}
 .im-pas{background:var(--pas);color:#3A2400}
 
 .skor-tablo{display:flex;flex-direction:column;gap:8px}
-.skor-satir{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:15px;background:rgba(255,248,236,.055);border:1.5px solid var(--cizgi)}
-.skor-satir.lider{border-color:var(--turkuaz);background:rgba(23,195,178,.13)}
+.skor-satir{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:15px;background:rgba(245,234,218,.055);border:1.5px solid var(--cizgi)}
+.skor-satir.lider{border-color:var(--pirinc);background:rgba(212,160,80,.13)}
 .skor-satir .renk-nokta{width:26px;height:26px;border-radius:8px}
 .skor-satir b{flex:1;font-size:15px;font-weight:800}
-.skor-satir .puan{font-family:var(--d);font-weight:700;font-size:24px;font-variant-numeric:tabular-nums}
+.skor-satir .puan{font-family:var(--d);font-weight:700;font-size:30px;font-variant-numeric:tabular-nums;line-height:1.16}
 
 /* ===== Modal ===== */
 .ortu{
-  position:absolute;inset:0;z-index:40;background:rgba(10,4,26,.8);
+  position:absolute;inset:0;z-index:40;background:rgba(13,10,6,.8);
   display:none;place-items:center;padding:26px;backdrop-filter:blur(7px);
 }
 .ortu.acik{display:grid;animation:soluk .22s ease}
 @keyframes soluk{from{opacity:0}to{opacity:1}}
 .modal{
-  width:100%;max-width:340px;background:linear-gradient(178deg,#33165C,#220E45);
-  border:1.5px solid rgba(255,248,236,.2);border-radius:26px;padding:26px 22px 22px;
+  width:100%;max-width:340px;background:linear-gradient(178deg,#3B3022,#241D15);
+  border:1.5px solid rgba(245,234,218,.2);border-radius:26px;padding:26px 22px 22px;
   text-align:center;display:flex;flex-direction:column;gap:15px;
   box-shadow:0 34px 70px -18px rgba(0,0,0,.85);
   animation:modalGir .36s cubic-bezier(.2,1.1,.3,1.15);
@@ -446,44 +469,44 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 /* ===== Kazanan ===== */
 .kupa{width:96px;height:96px;border-radius:30px;display:grid;place-items:center;margin:0 auto;
   background:linear-gradient(160deg,#FFD36B,var(--pas));color:#3A2400;
-  box-shadow:0 20px 44px -12px rgba(255,176,32,.6);animation:sallan 4s ease-in-out infinite}
+  box-shadow:0 20px 44px -12px rgba(245,165,36,.6);animation:sallan 4s ease-in-out infinite}
 .kupa svg{width:52px;height:52px;stroke-width:2}
 
 /* ===== Ses tezgahi ===== */
 .ses-liste{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
 .ses-btn{
   display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:13px 14px;
-  border-radius:15px;background:rgba(255,248,236,.06);border:1.5px solid var(--cizgi);text-align:left;
+  border-radius:15px;background:rgba(245,234,218,.06);border:1.5px solid var(--cizgi);text-align:left;
 }
 .ses-btn:active{transform:scale(.96)}
 .ses-btn b{font-size:14px;font-weight:800}
 .ses-btn span{font-size:11px;color:var(--sis);line-height:1.35}
-.ses-btn.calıyor{border-color:var(--turkuaz);background:rgba(23,195,178,.16)}
+.ses-btn.calıyor{border-color:var(--pirinc);background:rgba(212,160,80,.16)}
 
 /* ===== Masaustu bilgi paneli ===== */
 .panel-blok{margin-bottom:30px}
 .panel h2{font-family:var(--d);font-weight:600;font-size:20px;margin-bottom:11px}
-.panel h3{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--turkuaz);margin-bottom:9px}
+.panel h3{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--pirinc);margin-bottom:9px}
 .panel p{font-size:13.5px;line-height:1.6;color:var(--sis);margin-bottom:9px}
 .panel p b{color:var(--fildisi);font-weight:800}
 .panel ul{margin:0 0 9px 17px}
 .panel li{font-size:13.5px;line-height:1.65;color:var(--sis);margin-bottom:3px}
 .panel li b{color:var(--fildisi)}
-.panel-kutu{background:rgba(255,248,236,.05);border:1.5px solid var(--cizgi);border-radius:18px;padding:18px 20px}
+.panel-kutu{background:rgba(245,234,218,.05);border:1.5px solid var(--cizgi);border-radius:18px;padding:18px 20px}
 
 .palet{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px}
 .palet div{border-radius:13px;padding:11px 12px 10px;font-size:10px;font-weight:800;line-height:1.35;min-height:66px;display:flex;flex-direction:column;justify-content:flex-end;font-variant-numeric:tabular-nums}
 
 .panel-baslik{display:flex;align-items:center;gap:13px;margin-bottom:22px}
 .panel-baslik .logo{font-size:27px}
-.rozet{display:inline-block;padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:rgba(23,195,178,.2);color:var(--turkuaz);border:1px solid rgba(23,195,178,.4)}
+.rozet{display:inline-block;padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:rgba(212,160,80,.2);color:var(--pirinc);border:1px solid rgba(212,160,80,.4)}
 
 .kod{
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.65;
-  background:rgba(10,4,26,.6);border:1.5px solid var(--cizgi);border-radius:14px;
+  background:rgba(13,10,6,.6);border:1.5px solid var(--cizgi);border-radius:14px;
   padding:14px 16px;overflow-x:auto;color:#C9B8E8;white-space:pre;
 }
-.kod b{color:var(--turkuaz);font-weight:700}
+.kod b{color:var(--pirinc);font-weight:700}
 
 @media(prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
@@ -503,7 +526,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
     <div class="marka">
       <div class="logo-kart"><i></i><i></i><i></i><i></i></div>
       <div class="logo">NafuTabu</div>
-      <div class="logo-alt">Anlat Bakalım</div>
+      <div class="logo-alt">ANLAT BAKALIM</div>
     </div>
     <p class="aciklama" style="text-align:center;max-width:280px;margin:14px auto 0">
       Kelimeyi anlat, yasaklı beşine değme. Telefon anlatanda, rakip omzunun üstünden bakar.
@@ -560,7 +583,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 
         <div class="secici-blok">
           <div class="secici-ust">
-            <span class="ustyazi">Tur Süresi</span>
+            <span class="ustyazi">TUR SÜRESİ</span>
             <span class="secici-deger" id="sure-deger">60<small>saniye</small></span>
           </div>
           <div class="ray" id="sure-ray"></div>
@@ -568,14 +591,14 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 
         <div class="secici-blok">
           <div class="secici-ust">
-            <span class="ustyazi">Pas Hakkı</span>
+            <span class="ustyazi">PAS HAKKI</span>
             <span class="secici-deger" id="pas-deger">3<small>hak</small></span>
           </div>
           <div class="ray" id="pas-ray"></div>
         </div>
 
         <div class="secici-blok">
-          <div class="secici-ust"><span class="ustyazi">Oyun Nasıl Bitsin</span></div>
+          <div class="secici-ust"><span class="ustyazi">OYUN NASIL BİTSİN</span></div>
           <div class="segment" id="bitis-segment">
             <button data-mod="puan" class="secili">Hedef Puan</button>
             <button data-mod="tur">Tur Sayısı</button>
@@ -639,8 +662,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
       </div>
       <div class="halka-sar" id="halka-sar">
         <svg viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r="43" fill="none" stroke="rgba(255,248,236,.14)" stroke-width="7"/>
-          <circle id="halka-yay" cx="50" cy="50" r="43" fill="none" stroke="var(--turkuaz)" stroke-width="7"
+          <circle cx="50" cy="50" r="43" fill="none" stroke="rgba(245,234,218,.14)" stroke-width="7"/>
+          <circle id="halka-yay" cx="50" cy="50" r="43" fill="none" stroke="var(--pirinc)" stroke-width="7"
                   stroke-linecap="round" stroke-dasharray="270.2" stroke-dashoffset="0"/>
         </svg>
         <div class="halka-yazi" id="halka-yazi">60</div>
@@ -661,32 +684,40 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
     <div class="aksiyonlar">
       <button class="aksiyon a-yanlis" id="btn-yanlis">
         <span class="yuvarlak">%%x%%</span>
-        <span class="etiket">Yanlış</span>
+        <span class="etiket">YANLIŞ</span>
         <span class="sayac" id="say-yanlis">0</span>
       </button>
       <button class="aksiyon a-pas" id="btn-pas">
         <span class="yuvarlak" id="pas-yuvarlak">%%chevrons-right%%</span>
-        <span class="etiket">Pas</span>
+        <span class="etiket">PAS</span>
         <span class="sayac" id="say-pas">0/3</span>
       </button>
       <button class="aksiyon a-dogru" id="btn-dogru">
         <span class="yuvarlak">%%check%%</span>
-        <span class="etiket">Doğru</span>
+        <span class="etiket">DOĞRU</span>
         <span class="sayac" id="say-dogru">0</span>
       </button>
     </div>
   </section>
 
-  <!-- TUR OZETI -->
+  <!-- TUR OZETI
+       Belirginlik sirasi:  1) tur puani   2) takimlar arasi fark
+                            3) dogru / pas / yanlis sayilari
+       Anlatilan kelimeler KASITLI olarak gosterilmez - pas turunda
+       hangi kelimelerin geri gelecegi surpriz kalmali. -->
   <section class="ekran" id="e-ozet">
-    <h1 class="baslik" style="text-align:center">Tur Bitti</h1>
-    <div class="ozet-puan" id="ozet-puan"></div>
-    <p class="aciklama" style="text-align:center;margin-bottom:14px" id="ozet-takim"></p>
-    <div class="kaydir"><div class="yigin" style="gap:7px" id="ozet-liste"></div></div>
-    <div class="yigin" style="gap:9px;margin-top:14px">
+    <div class="kaydir ortala">
+      <div class="ozet-tepe">
+        <span class="ustyazi">TUR BİTTİ</span>
+        <div class="ozet-puan" id="ozet-puan"></div>
+        <p class="ozet-takim" id="ozet-takim"></p>
+      </div>
+
       <div class="skor-tablo" id="ozet-skor"></div>
-      <button class="btn btn-ana" id="ozet-devam">Sıradaki Takım %%arrow-right%%</button>
+
+      <div class="ozet-sayaclar" id="ozet-sayaclar"></div>
     </div>
+    <button class="btn btn-ana" style="margin-top:14px" id="ozet-devam">Sıradaki Takım %%arrow-right%%</button>
   </section>
 
   <!-- KAZANAN -->
@@ -730,7 +761,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
 <aside class="panel">
   <div class="panel-baslik">
     <span class="logo">NafuTabu</span>
-    <span class="rozet">Adım 0 · Tasarım Onayı</span>
+    <span class="rozet">ADIM 0 · TASARIM ONAYI</span>
   </div>
 
   <div class="panel-blok">
@@ -741,23 +772,23 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
   </div>
 
   <div class="panel-blok">
-    <h3>Renk Paleti</h3>
+    <h3>RENK PALETİ</h3>
     <div class="palet">
-      <div style="background:linear-gradient(160deg,#1B0B3A,#3D1470);color:#FDF6E9;border:1px solid rgba(255,248,236,.16)">ZEMİN<br>#1B0B3A</div>
-      <div style="background:#FFF8EC;color:#17102E">KART<br>#FFF8EC</div>
-      <div style="background:#17C3B2;color:#04231F">TURKUAZ<br>#17C3B2</div>
-      <div style="background:#14C08A;color:#02261A">DOĞRU<br>#14C08A</div>
-      <div style="background:#FF3D5A;color:#fff">YANLIŞ<br>#FF3D5A</div>
-      <div style="background:#FFB020;color:#3A2400">PAS<br>#FFB020</div>
-      <div style="background:#FF4FA3;color:#2B0417">AKSAN<br>#FF4FA3</div>
-      <div style="background:#17102E;color:#FDF6E9;border:1px solid rgba(255,248,236,.16)">METİN<br>#17102E</div>
+      <div style="background:linear-gradient(160deg,#1F1913,#413221);color:#F5EADA;border:1px solid rgba(212,160,80,.3)">CEVİZ<br>#1F1913</div>
+      <div style="background:#F7F0E1;color:#17120A">TAŞ<br>#F7F0E1</div>
+      <div style="background:#D4A050;color:#1A1208">PİRİNÇ<br>#D4A050</div>
+      <div style="background:#12A150;color:#fff">DOĞRU<br>#12A150</div>
+      <div style="background:#E01E37;color:#fff">YANLIŞ<br>#E01E37</div>
+      <div style="background:#F5A524;color:#3A2400">PAS<br>#F5A524</div>
+      <div style="background:#2E7FE0;color:#fff">MAVİ<br>#2E7FE0</div>
+      <div style="background:#17120A;color:#F5EADA;border:1px solid rgba(212,160,80,.3)">METİN<br>#17120A</div>
     </div>
     <p style="margin-top:11px">Ana kelimenin kart üzerindeki kontrastı <b>14.8:1</b>, yasaklı kelimelerin
     <b>7.9:1</b>. İkisi de WCAG AAA. Omuz üstünden bakan denetçi rahatça okur.</p>
   </div>
 
   <div class="panel-blok">
-    <h3>Seri Nasıl İlerliyor</h3>
+    <h3>SERİ NASIL İLERLİYOR</h3>
     <div class="panel-kutu">
       <p style="margin:0 0 10px"><b>1 · Ana geçiş</b><br>
       250 kart karılır. Deste bitmeden hiçbir kart ikinci kez gelmez.</p>
@@ -772,7 +803,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
   </div>
 
   <div class="panel-blok">
-    <h3>Neden Bu Tasarım</h3>
+    <h3>NEDEN BU TASARIM</h3>
     <ul>
       <li><b>Fildişi kart, koyu zemin.</b> Denetçi anlatanın arkasından açılı bakıyor. En yüksek kontrast burada.</li>
       <li><b>Lucide ikon ailesi (ISC).</b> 21 kategori simgesi tek aileden, aynı 24×24 ızgara, aynı 2px çizgi. Uyumsuzluk imkânsız.</li>
@@ -783,7 +814,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-we
   </div>
 
   <div class="panel-blok">
-    <h3>Kelime Verisi Böyle Görünecek</h3>
+    <h3>KELİME VERİSİ BÖYLE GÖRÜNECEK</h3>
     <div class="kod"><b>cografya.csv</b>  (Excel'de açılır)
 
 kelime;yasakli1;yasakli2;yasakli3;yasakli4;yasakli5;zorluk
@@ -795,7 +826,7 @@ DELTA;NEHİR;AĞIZ;OVA;VERİMLİ;TOPRAK;4</div>
   </div>
 
   <div class="panel-blok">
-    <h3>Sırada Ne Var</h3>
+    <h3>SIRADA NE VAR</h3>
     <ul>
       <li>Bu tasarımı onayla veya değişiklik iste</li>
       <li>Örnek kart setini onayla (üslup ve zorluk oturması için)</li>
@@ -812,6 +843,25 @@ DELTA;NEHİR;AĞIZ;OVA;VERİMLİ;TOPRAK;4</div>
 "use strict";
 const IKON = __IKONLAR__;
 const SES_VERI = __SESLER__;
+
+/* ---------- Turkce buyuk harf ----------
+   Iki ayri tuzak var:
+
+   1) CSS text-transform:uppercase  tarayicinin dil ayarina bakar.
+      lang="tr" verilmezse "bitti" -> "BITTI" olur, "BITTI" degil "BITTI".
+      Dogrusu "BITTI" degil "BITTI"... yani noktali I: BİTTİ.
+   2) JS toUpperCase() ayni hatayi yapar, toLocaleUpperCase ise ICU ister
+      ve Android Hermes'te ICU eksik olabilir.
+
+   Cozum: lang etiketi + kendi harf eslemesi. */
+document.documentElement.lang = 'tr';
+
+function trUpper(metin){
+  return String(metin).replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase();
+}
+function trLower(metin){
+  return String(metin).replace(/I/g, 'ı').replace(/İ/g, 'i').toLowerCase();
+}
 
 /* ---------- Ikon yerlestirme ----------
    Tum ikonlar tek aileden (Lucide, ISC). Ayni cizim kurallari:
@@ -834,11 +884,17 @@ function ikonlariYerlestir(kok){
 }
 ikonlariYerlestir(document);
 
-/* ---------- Cini kafes deseni ----------
-   Sekiz kose yildiz orgusu. Cini geleneginden gelen geometri. */
-(function kafesCiz(){
+/* ---------- Ahsap doku ----------
+   Oyun bir tahtanin uzerinde oynaniyor. Arka plan da ceviz damari
+   ve masanin ustune dusen lamba isigi. Jenerik gradyan degil. */
+(function ahsapCiz(){
   const tuval = document.getElementById('kafes');
   const ctx = tuval.getContext('2d');
+
+  // Deterministik gurultu - her acilista ayni damar deseni
+  let tohum = 20260811;
+  const rastgele = () => (tohum = (1103515245 * tohum + 12345) & 0x7FFFFFFF) / 0x7FFFFFFF;
+
   function ciz(){
     const o = Math.min(window.devicePixelRatio || 1, 2);
     const g = window.innerWidth, y = window.innerHeight;
@@ -846,28 +902,43 @@ ikonlariYerlestir(document);
     tuval.style.width = g + 'px'; tuval.style.height = y + 'px';
     ctx.setTransform(o, 0, 0, o, 0, 0);
     ctx.clearRect(0, 0, g, y);
+    tohum = 20260811;
 
-    const a = 78;                       // kafes adimi
-    ctx.lineWidth = 1;
-    for (let sy = -a; sy < y + a; sy += a){
-      for (let sx = -a; sx < g + a; sx += a){
-        const mx = sx + a / 2, my = sy + a / 2, r = a * 0.40;
-        // Ust uste binen iki kare -> sekiz kose yildiz
-        for (const donme of [0, Math.PI / 4]){
-          ctx.beginPath();
-          for (let k = 0; k < 4; k++){
-            const t = donme + k * Math.PI / 2;
-            const px = mx + Math.cos(t) * r, py = my + Math.sin(t) * r;
-            k ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-          }
-          ctx.closePath();
-          ctx.strokeStyle = 'rgba(23,195,178,.085)';
-          ctx.stroke();
-        }
+    // Masanin ustundeki lamba - sicak isik havuzu
+    const isik = ctx.createRadialGradient(g * 0.5, y * 0.34, 0, g * 0.5, y * 0.34, Math.max(g, y) * 0.72);
+    isik.addColorStop(0, 'rgba(232,180,96,.20)');
+    isik.addColorStop(0.55, 'rgba(212,160,80,.06)');
+    isik.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = isik;
+    ctx.fillRect(0, 0, g, y);
+
+    // Ceviz damari - dikey, hafif dalgali cizgiler
+    ctx.lineCap = 'round';
+    for (let x = -30; x < g + 30; x += 7 + rastgele() * 11){
+      const genlik = 3 + rastgele() * 9;
+      const dalga = 150 + rastgele() * 320;
+      const faz = rastgele() * Math.PI * 2;
+      const koyu = rastgele() > 0.62;
+      ctx.beginPath();
+      for (let sy = -10; sy <= y + 10; sy += 9){
+        const sx = x + Math.sin(sy / dalga + faz) * genlik
+                     + Math.sin(sy / (dalga * 0.31) + faz) * genlik * 0.28;
+        sy === -10 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+      }
+      ctx.strokeStyle = koyu ? 'rgba(0,0,0,.26)' : 'rgba(226,176,96,.075)';
+      ctx.lineWidth = koyu ? 1.4 : 1;
+      ctx.stroke();
+    }
+
+    // Seyrek budak halkalari - damari canli tutar
+    for (let k = 0; k < 3; k++){
+      const bx = rastgele() * g, by = rastgele() * y;
+      for (let r = 5; r < 34; r += 4.5){
         ctx.beginPath();
-        ctx.arc(mx, my, r * 0.16, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,79,163,.10)';
-        ctx.fill();
+        ctx.ellipse(bx, by, r * 0.42, r, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0,0,0,.14)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
       }
     }
   }
@@ -910,24 +981,24 @@ addEventListener('pointerdown', sesHazirla, { once: true });
 const KATEGORILER = [
   { id:'genel',      ad:'Genel',            ikon:'shapes',         renk:'#17C3B2', hedef:600 },
   { id:'gunluk',     ad:'Günlük Yaşam',     ikon:'sofa',           renk:'#FF9E45', hedef:250 },
-  { id:'yemek',      ad:'Yemek ve Mutfak',  ikon:'cooking-pot',    renk:'#E63946', hedef:250 },
+  { id:'yemek',      ad:'Yemek ve Mutfak',  ikon:'utensils-crossed',    renk:'#E63946', hedef:250 },
   { id:'fen',        ad:'Fen Bilimleri',    ikon:'atom',           renk:'#4CC9F0', hedef:250 },
-  { id:'teknoloji',  ad:'Teknoloji ve YZ',  ikon:'cpu',            renk:'#7C6BFF', hedef:250 },
+  { id:'teknoloji',  ad:'Teknoloji ve YZ',  ikon:'brain-circuit',            renk:'#7C6BFF', hedef:250 },
   { id:'tarih',      ad:'Tarih',            ikon:'landmark',       renk:'#C9A227', hedef:250 },
   { id:'cografya',   ad:'Coğrafya',         ikon:'mountain',       renk:'#2EAF7D', hedef:250 },
-  { id:'turkiye',    ad:'Türkiye ve Kültür',ikon:'moon-star',      renk:'#F03E6E', hedef:250 },
-  { id:'din',        ad:'Din Kültürü',      ikon:'book-open-text', renk:'#1E8C6E', hedef:250 },
+  { id:'turkiye',    ad:'Türkiye ve Kültür',ikon:'turk-bayragi',      renk:'#E30A17', hedef:250, ikonMetin:'#FFFFFF' },
+  { id:'din',        ad:'Din Kültürü',      ikon:'hilal', renk:'#1E8C6E', hedef:250 },
   { id:'edebiyat',   ad:'Edebiyat',         ikon:'feather',        renk:'#C77DFF', hedef:250 },
   { id:'sinema',     ad:'Sinema ve Diziler',ikon:'clapperboard',   renk:'#FF4FA3', hedef:250 },
   { id:'muzik',      ad:'Müzik',            ikon:'guitar',         renk:'#F4845F', hedef:250 },
-  { id:'populer',    ad:'Popüler Kültür',   ikon:'sparkles',       renk:'#FFB020', hedef:250 },
+  { id:'populer',    ad:'Popüler Kültür',   ikon:'trending-up',       renk:'#FFB020', hedef:250 },
   { id:'spor',       ad:'Spor Dünyası',     ikon:'volleyball',     renk:'#8AC926', hedef:250 },
   { id:'takimlar',   ad:'Takım ve Sporcu',  ikon:'shield-half',    renk:'#0E86D4', hedef:250 },
   { id:'meslek',     ad:'Meslek ve İş',     ikon:'briefcase',      renk:'#C97B4A', hedef:250 },
-  { id:'saglik',     ad:'Sağlık',           ikon:'heart-pulse',    renk:'#EF476F', hedef:250 },
+  { id:'saglik',     ad:'Sağlık',           ikon:'stethoscope',    renk:'#EF476F', hedef:250 },
   { id:'hobi',       ad:'Hobi ve Oyunlar',  ikon:'dices',          renk:'#8ECAE6', hedef:250 },
   { id:'seyahat',    ad:'Seyahat',          ikon:'plane',          renk:'#00B2CA', hedef:250 },
-  { id:'kultur',     ad:'Genel Kültür',     ikon:'lightbulb',      renk:'#FFD166', hedef:250 }
+  { id:'kultur',     ad:'Genel Kültür',     ikon:'graduation-cap',      renk:'#FFD166', hedef:250 }
 ];
 
 const KARTLAR = {
@@ -1168,8 +1239,9 @@ const KARTLAR = {
 };
 
 /* ================= DURUM ================= */
-const RENKLER = ['#FF3D5A','#17C3B2','#FFB020','#7C6BFF'];
-const VARSAYILAN_AD = ['Kırmızı Takım','Turkuaz Takım','Sarı Takım','Mor Takım'];
+// Okey taslarinin dort rengi - oyunun kendi dunyasindan
+const RENKLER = ['#E01E37','#2E7FE0','#F5A524','#12A150'];
+const VARSAYILAN_AD = ['Kırmızı Takım','Mavi Takım','Sarı Takım','Yeşil Takım'];
 
 const ayarlar = {
   sure:60, pasHakki:3, bitisModu:'puan', hedefPuan:30, turSayisi:5,
@@ -1210,7 +1282,7 @@ document.querySelectorAll('[data-git]').forEach(b =>
 /* ================= NASIL OYNANIR ================= */
 const NASIL = [
   ['users','Takımlara ayrılın','En az iki takım kurun. Her turda bir takımdan biri anlatır, kendi takımı tahmin eder.'],
-  ['book-open-text','Kartı anlat','Ekrandaki büyük kelimeyi anlat. Altındaki beş kelimeye değemezsin.'],
+  ['scroll-text','Kartı anlat','Ekrandaki büyük kelimeyi anlat. Altındaki beş kelimeye değemezsin.'],
   ['shield-half','Rakip denetler','Telefon anlatanda. Rakip takımdan biri omzunun üstünden bakar ve yasaklı kelimeyi yakalar.'],
   ['check','Doğru bilinirse +1','Takımın kelimeyi bulunca yeşil tuşa bas.'],
   ['x','Yasaklı kelime −1','Yasaklı kelime söylenirse veya el hareketi yapılırsa kırmızı tuşa basılır.'],
@@ -1219,7 +1291,7 @@ const NASIL = [
 ];
 document.getElementById('nasil-liste').innerHTML = NASIL.map(([ik, bas, met]) => `
   <div class="ozet-satir" style="align-items:flex-start;padding:14px">
-    <span class="im" style="background:var(--turkuaz);color:#04231F;margin-top:1px">${ikonSvg(ik)}</span>
+    <span class="im" style="background:var(--pirinc);color:#04250F;margin-top:1px">${ikonSvg(ik)}</span>
     <span style="flex:1;min-width:0">
       <b style="display:block;font-size:15px;margin-bottom:3px">${bas}</b>
       <span class="aciklama" style="font-size:13px">${met}</span>
@@ -1342,12 +1414,12 @@ function kategoriCiz(){
     const varMi = !!KARTLAR[k.id];
     return `<button class="kutucuk" data-kat="${k.id}">
       <span class="adet-rozet">${varMi ? KARTLAR[k.id].length : '—'}</span>
-      <span class="disk" style="background:${k.renk};color:#0D0620">${ikonSvg(k.ikon)}</span>
+      <span class="disk" style="background:${k.renk};color:${k.ikonMetin || '#1A1208'}">${ikonSvg(k.ikon)}</span>
       <span>${k.ad}</span>
     </button>`;
   }).join('') + `
     <button class="kutucuk karisik" data-kat="karisik">
-      <span class="disk" style="background:linear-gradient(140deg,var(--magenta),var(--turkuaz));color:#0D0620">${ikonSvg('shuffle')}</span>
+      <span class="disk" style="background:linear-gradient(140deg,var(--magenta),var(--pirinc));color:#1A1208">${ikonSvg('shuffle')}</span>
       <span>KARIŞIK<small>Tüm kategoriler tek destede</small></span>
     </button>`;
 
@@ -1469,9 +1541,8 @@ function siraEkraniniAc(){
   document.getElementById('sira-rozet').style.background = t.renk + '2E';
   document.getElementById('sira-rozet').style.color = t.renk;
   document.getElementById('sira-takim').textContent = anlatanAdi();
-  document.getElementById('sira-alt').textContent = ayarlar.isimlerAcik
-    ? t.ad + ' · Telefonu sen tut, rakipten biri omzundan baksın.'
-    : 'Telefonu anlatan tutsun. Rakipten biri omzunun üstünden baksın.';
+  document.getElementById('sira-alt').textContent =
+    'Telefonu sen tut, rakipten biri omzundan baksın.';
   ekranAc('e-sira');
 }
 document.getElementById('basla-btn').addEventListener('click', geriSayimBaslat);
@@ -1481,11 +1552,12 @@ function geriSayimBaslat(){
   let n = 3;
   const yazi = document.getElementById('gerisayim-yazi');
   yazi.textContent = n;
-  sesCal('tik'); titret(20);
+  sesCal('gerisayim'); titret(22);
   const s = setInterval(() => {
     n--;
     if (n === 0){
       clearInterval(s);
+      sesCal('basla'); titret([30, 40, 30]);
       turBaslat();
       return;
     }
@@ -1493,7 +1565,7 @@ function geriSayimBaslat(){
     yazi.style.animation = 'none';
     void yazi.offsetWidth;
     yazi.style.animation = '';
-    sesCal('tik'); titret(20);
+    sesCal('gerisayim'); titret(22);
   }, 800);
 }
 
@@ -1509,7 +1581,7 @@ function turBaslat(){
 
   const kat = KATEGORILER.find(k => k.id === oyun.aktifKategori);
   document.getElementById('tur-kategori-ad').textContent =
-    (kat ? kat.ad : 'KARIŞIK').toLocaleUpperCase('tr-TR');
+    trUpper(kat ? kat.ad : 'KARIŞIK');
   document.getElementById('tur-takim-ad').textContent = anlatanAdi();
   document.getElementById('kart').classList.remove('sonkart');
   document.querySelectorAll('.kart-rozet').forEach(r => r.remove());
@@ -1544,7 +1616,7 @@ function halkaCiz(){
   const yay = document.getElementById('halka-yay');
   yay.style.strokeDashoffset = String(HALKA_CEVRE * (1 - oran));
   yay.style.stroke = oyun.sonKartModuAktif ? 'var(--yanlis)'
-                   : oyun.kalanSaniye <= 10 ? 'var(--yanlis)' : 'var(--turkuaz)';
+                   : oyun.kalanSaniye <= 10 ? 'var(--yanlis)' : 'var(--pirinc)';
   document.getElementById('halka-yazi').textContent = Math.max(0, oyun.kalanSaniye);
   document.getElementById('halka-sar').classList.toggle('acil', oyun.kalanSaniye <= 10);
 }
@@ -1708,23 +1780,28 @@ function turuBitir(){
   const t = aktifTakim();
   t.anlatanSira++;
 
+  // 1. belirginlik: turun getirdigi puan
   const fark = oyun.turDogru - oyun.turYanlis;
   document.getElementById('ozet-puan').innerHTML =
-    `<span style="color:${fark >= 0 ? 'var(--dogru)' : 'var(--yanlis)'}">${fark >= 0 ? '+' : ''}${fark}</span>
-     <span style="font-size:19px;color:var(--sis)">puan</span>`;
-  document.getElementById('ozet-takim').textContent =
-    `${t.ad} · ${oyun.turDogru} doğru, ${oyun.turYanlis} yanlış, ${oyun.turPas} pas`;
+    `<span style="color:${fark >= 0 ? 'var(--dogru)' : 'var(--yanlis)'}">${fark >= 0 ? '+' : ''}${fark}</span>`
+  + `<span class="ozet-puan-birim">puan</span>`;
+  document.getElementById('ozet-takim').textContent = t.ad;
 
-  const IM = { dogru:['im-dogru','check'], yanlis:['im-yanlis','x'], pas:['im-pas','chevrons-right'] };
-  document.getElementById('ozet-liste').innerHTML = oyun.turKayit.length
-    ? oyun.turKayit.map(([tur, kelime]) => `
-      <div class="ozet-satir">
-        <span class="im ${IM[tur][0]}">${ikonSvg(IM[tur][1])}</span>
-        <b>${kelime}</b>
-      </div>`).join('')
-    : '<p class="aciklama" style="text-align:center;padding:16px">Bu turda hiç kart işlenmedi.</p>';
-
+  // 2. belirginlik: takimlar arasi durum
   skorCiz('ozet-skor');
+
+  // 3. belirginlik: dogru / pas / yanlis sayilari
+  document.getElementById('ozet-sayaclar').innerHTML = [
+    ['dogru',  'check',          'DOĞRU',  oyun.turDogru,  'var(--dogru)'],
+    ['pas',    'chevrons-right', 'PAS',    oyun.turPas,    'var(--pas)'],
+    ['yanlis', 'x',              'YANLIŞ', oyun.turYanlis, 'var(--yanlis)'],
+  ].map(([, ikon, etiket, deger, renk]) => `
+    <div class="ozet-sayac">
+      <span class="ozet-sayac-im" style="color:${renk}">${ikonSvg(ikon)}</span>
+      <b style="color:${renk}">${deger}</b>
+      <span>${etiket}</span>
+    </div>`).join('');
+
   ekranAc('e-ozet');
 
   const bitti = oyunBittiMi();
@@ -1778,12 +1855,16 @@ document.getElementById('kazanan-btn').addEventListener('click', () => {
 
 /* ================= SES TEZGAHI ================= */
 const SES_ACIKLAMA = [
-  ['dogru','Doğru','Marimba, yükselen iki nota'],
-  ['yanlis','Yanlış','Alçalan iki nota, hafif doygunluk'],
-  ['pas','Pas','Nötr tık, yukarı perde bükümü'],
-  ['tik','Tik','Son 10 saniyede her saniye'],
-  ['korna','Korna','Tur bitişi, detune akor'],
-  ['sonkart','Son Kart','Gergin çift vuruş']
+  ['dogru','Doğru','Marimba, yükselen üç nota'],
+  ['yanlis','Yanlış — A','Ahşap tokmak vuruşu'],
+  ['yanlis-b','Yanlış — B','Boğuk alçalan uğultu'],
+  ['pas','Pas — A','Tahtada taş kaydırma'],
+  ['pas-b','Pas — B','İki kuru tahta tık'],
+  ['gerisayim','Geri Sayım','3·2·1, yumuşak ve yuvarlak'],
+  ['basla','Başla','Yükselen ikili malet'],
+  ['tik','Tik','Son 10 saniye, kısık'],
+  ['korna','Korna','Tur bitişi, pirinç akor'],
+  ['sonkart','Son Kart','Tremololu gergin ikili']
 ];
 document.getElementById('ses-liste').innerHTML = SES_ACIKLAMA.map(([id, ad, ac]) => `
   <button class="ses-btn" data-ses="${id}"><b>${ad}</b><span>${ac}</span></button>`).join('');
@@ -1794,7 +1875,7 @@ document.querySelectorAll('[data-ses]').forEach(b =>
     ayarlar.sesAcik = true;
     sesCal(b.dataset.ses);
     ayarlar.sesAcik = eskiDurum;
-    b.style.borderColor = 'var(--turkuaz)';
+    b.style.borderColor = 'var(--pirinc)';
     setTimeout(() => { b.style.borderColor = ''; }, 320);
   }));
 
