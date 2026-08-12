@@ -19,6 +19,7 @@ import { BOSLUK, YARICAP } from '../tema/golgeler';
 import { RENK } from '../tema/renkler';
 import { BOYUT } from '../tema/yazitipi';
 import { Yazi } from './Yazi';
+import { Yuva } from './Yuva';
 
 type Ozellikler = {
   metin: string;
@@ -70,13 +71,12 @@ export function Buton({
       accessibilityLabel={metin}
       accessibilityState={{ disabled: pasif }}
     >
-      <View style={[durum.taban, { paddingBottom: derinlik }, pasif && durum.pasif]}>
-        <View
-          style={[
-            durum.kalinlik,
-            { height: derinlik, backgroundColor: ikincil ? 'rgba(0,0,0,0.3)' : RENK.dogruKoyu },
-          ]}
-        />
+      <Yuva
+        derinlik={derinlik}
+        altRenk={ikincil ? 'rgba(0,0,0,0.3)' : RENK.dogruKoyu}
+        yaricap={YARICAP.normal}
+        style={pasif && durum.pasif}
+      >
         <Animated.View
           style={[durum.govde, ikincil ? durum.ikincil : durum.ana, stil]}
         >
@@ -86,16 +86,19 @@ export function Buton({
           </Yazi>
           {ikon && ikonSagda ? <Ikon ad={ikon} boyut={20} renk={metinRenk} /> : null}
         </Animated.View>
-      </View>
+      </Yuva>
     </Pressable>
   );
 }
 
 /**
- * Oyundan cikis. Tur ekraninin ust satirinda durur.
+ * Oyundan cikis. Oyun ekranlarinin ust satirinda hep SOL kosede durur.
  *
  * Yalniz ikon - ust satirda kategori adi ve sure halkasi icin yer birakmali.
- * Dokunma hedefi hitSlop ile 44px esiginin uzerine cikarilir.
+ *
+ * Dokunma alani 44px, gorunen kutu 34px. hitSlop kullanilmiyor cunku
+ * hitSlop yalnizca ebeveynin kendi sinirlari ICINDE genisletir - satir
+ * 34px yuksekse tasan kisim hicbir zaman dokunulabilir olmuyordu.
  */
 export function CikisButonu({ onPress }: { onPress: () => void }) {
   return (
@@ -103,10 +106,39 @@ export function CikisButonu({ onPress }: { onPress: () => void }) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel="Oyundan çık"
-      hitSlop={14}
-      style={durum.cikis}
+      style={durum.cikisAlani}
     >
-      <Ikon ad="house" boyut={19} renk={RENK.sis} cizgiKalinligi={2.3} />
+      <View style={durum.cikisKutu}>
+        <Ikon ad="house" boyut={19} renk={RENK.sis} cizgiKalinligi={2.3} />
+      </View>
+    </Pressable>
+  );
+}
+
+/**
+ * Kucuk metin baglantisi. Ust satirda ikincil bir yol sunar.
+ *
+ * Etiketi acikca yazar - "Geri" gibi belirsiz bir soz yerine ne olacagini
+ * soyler. Yukseklik 44px esiginde.
+ */
+export function BagButonu({
+  metin,
+  ikon,
+  onPress,
+}: {
+  metin: string;
+  ikon?: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={metin}
+      style={durum.bag}
+    >
+      {ikon ? <Ikon ad={ikon} boyut={16} renk={RENK.sis} cizgiKalinligi={2.2} /> : null}
+      <Yazi tur="cokKalin" boyut={BOYUT.kucuk + 1} renk={RENK.sis}>{metin}</Yazi>
     </Pressable>
   );
 }
@@ -151,7 +183,16 @@ const durum = StyleSheet.create({
     borderColor: RENK.cizgi,
   },
   pasif: { opacity: 0.4 },
-  cikis: {
+  // Dokunma alani - gorunmez, sadece 44px esigini saglar
+  cikisAlani: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  bag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: BOSLUK.minik + 2,
+    minHeight: 44,
+    paddingHorizontal: 4,
+  },
+  cikisKutu: {
     width: 34,
     height: 34,
     alignItems: 'center',
@@ -161,12 +202,19 @@ const durum = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: RENK.cizgi,
   },
+  /**
+   * alignSelf yalnizca SUTUN yerlesimde dogru - orada "yatayda esneme"
+   * demek. Satir yerlesiminde capraz eksen dikey oldugu icin butonu
+   * satirin tepesine yapistirir. Bu yuzden GeriButonu sadece sutun
+   * yerlesimli ekranlarda kullanilir.
+   */
   geri: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: BOSLUK.minik + 2,
     paddingVertical: 10,
     paddingRight: 14,
+    minHeight: 44,
     alignSelf: 'flex-start',
   },
 });

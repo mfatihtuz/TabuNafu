@@ -72,7 +72,10 @@ export default function KazananEkrani() {
             titresimAcik={titresimAcik}
             onPress={() => {
               oyunuSifirla();
-              yonlendir.replace('/kurulum/takimlar');
+              // Yigini koke sar, sonra kuruluma gir - yoksa terk edilen
+              // oyunun kurulum ekranlari yiginda birikiyor
+              if (yonlendir.canDismiss()) yonlendir.dismissAll();
+              yonlendir.push('/kurulum/takimlar');
             }}
           />
           <Buton
@@ -81,7 +84,8 @@ export default function KazananEkrani() {
             titresimAcik={titresimAcik}
             onPress={() => {
               oyunuSifirla();
-              yonlendir.replace('/');
+              if (yonlendir.canDismiss()) yonlendir.dismissAll();
+              else yonlendir.replace('/');
             }}
           />
         </View>

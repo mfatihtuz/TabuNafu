@@ -21,14 +21,6 @@ export const KART_GOLGE = Platform.select({
   default: {},
 });
 
-/** Butonun altindaki sabit kalinlik - basilinca kaybolur. */
-export function butonDerinlik(renk: string, yukseklik = 6) {
-  return {
-    borderBottomWidth: yukseklik,
-    borderBottomColor: renk,
-  };
-}
-
 export const PANEL = {
   backgroundColor: RENK.yuzey,
   borderWidth: 1.5,

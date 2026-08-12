@@ -41,7 +41,15 @@ export function Modal3D({
   onIkinci,
 }: Ozellikler) {
   return (
-    <Modal visible={acik} transparent animationType="fade" statusBarTranslucent>
+    <Modal
+      visible={acik}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      // Android donanim geri tusu - basilinca birinci secenege denk gelir.
+      // Verilmezse RN geri tusunu yutar ve pencere kapanmaz.
+      onRequestClose={onBirinci}
+    >
       <View style={durum.ortu}>
         <Animated.View entering={ZoomIn.duration(300)} style={durum.pencere}>
           <View style={[durum.ikon, { backgroundColor: ikonRenk }]}>

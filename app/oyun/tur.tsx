@@ -17,6 +17,7 @@ import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
 
 import { AksiyonButonu } from '../../src/arayuz/AksiyonButonu';
 import { CikisButonu } from '../../src/arayuz/Buton';
+import { CikisOnayi } from '../../src/arayuz/CikisOnayi';
 import { Kart3D } from '../../src/arayuz/Kart3D';
 import { Modal3D } from '../../src/arayuz/Modal3D';
 import { SureHalkasi } from '../../src/arayuz/SureHalkasi';
@@ -51,9 +52,9 @@ export default function TurEkrani() {
   const yenidenKar = oyunDeposu((d) => d.yenidenKar);
   const turuBitir = oyunDeposu((d) => d.turuBitir);
   const olayTemizle = oyunDeposu((d) => d.olayTemizle);
-  const turuDuraklat = oyunDeposu((d) => d.turuDuraklat);
-  const turaDevamEt = oyunDeposu((d) => d.turaDevamEt);
-  const oyunuSifirla = oyunDeposu((d) => d.oyunuSifirla);
+  const cikisSoruluyor = oyunDeposu((d) => d.cikisSoruluyor);
+  const cikisiSor = oyunDeposu((d) => d.cikisiSor);
+  const cikisiKapat = oyunDeposu((d) => d.cikisiKapat);
 
   /**
    * Bunlar ref degil state olmali. Ref degisimi yeniden cizim
@@ -62,7 +63,6 @@ export default function TurEkrani() {
    */
   const [kartSayaci, setKartSayaci] = useState(0);
   const [bildirim, setBildirim] = useState<string | null>(null);
-  const [cikisSoruluyor, setCikisSoruluyor] = useState(false);
 
   // Bildirim birkac saniye sonra kaybolur
   useEffect(() => {
@@ -117,12 +117,6 @@ export default function TurEkrani() {
     aksiyonIsle(tur);
   }
 
-  /** Cikis onayi acilir. Karar verilene kadar sure durur. */
-  function cikisiSor() {
-    if (seriBittiSoruluyor) return;
-    turuDuraklat();
-    setCikisSoruluyor(true);
-  }
 
   return (
     <Zemin>
@@ -191,25 +185,7 @@ export default function TurEkrani() {
         </View>
       </View>
 
-      <Modal3D
-        acik={cikisSoruluyor}
-        ikon="house"
-        ikonRenk={RENK.yanlis}
-        baslik="Oyundan çıkılsın mı"
-        metin="Tur yarıda kalır ve tüm puanlar silinir. Ana ekrana dönülür."
-        birinci="Oyuna Devam Et"
-        ikinci="Çık ve Sil"
-        titresimAcik={ayarlar.titresimAcik}
-        onBirinci={() => {
-          setCikisSoruluyor(false);
-          turaDevamEt();
-        }}
-        onIkinci={() => {
-          setCikisSoruluyor(false);
-          oyunuSifirla();
-          yonlendir.replace('/');
-        }}
-      />
+      <CikisOnayi acik={cikisSoruluyor} turYaridaMi onVazgec={cikisiKapat} />
 
       <Modal3D
         acik={seriBittiSoruluyor}
@@ -223,7 +199,10 @@ export default function TurEkrani() {
         onBirinci={yenidenKar}
         onIkinci={() => {
           turuBitir();
-          yonlendir.replace('/kurulum/kategori');
+          // replace degil dismissTo - yigina ikinci bir kategori ekrani
+          // eklemesin, kategori zaten yiginda duruyor
+          if (yonlendir.canDismiss()) yonlendir.dismissTo('/kurulum/kategori');
+          else yonlendir.replace('/kurulum/kategori');
         }}
       />
     </Zemin>

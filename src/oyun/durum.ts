@@ -70,6 +70,7 @@ export type OyunDurumu = {
   kilitli: boolean;
   /** Seri bitti sorusu ekranda mi. */
   seriBittiSoruluyor: boolean;
+  cikisSoruluyor: boolean;
   /** Son olay - ekranlar buna bakip ses calar ve animasyon tetikler. */
   sonOlay: OyunOlayi | null;
 
@@ -84,8 +85,8 @@ export type OyunDurumu = {
   aksiyonIsle: (tur: AksiyonTuru) => void;
   saniyeIlerlet: () => void;
   turuBitir: () => void;
-  turuDuraklat: () => void;
-  turaDevamEt: () => void;
+  cikisiSor: () => void;
+  cikisiKapat: () => void;
   siradakiTakimaGec: () => void;
 
   yenidenKar: () => void;
@@ -117,6 +118,7 @@ export const oyunDeposu = create<OyunDurumu>()(
       turSayaclari: BOS_TUR,
       kilitli: false,
       seriBittiSoruluyor: false,
+      cikisSoruluyor: false,
       sonOlay: null,
 
       // ---- Kurulum ----
@@ -177,6 +179,7 @@ export const oyunDeposu = create<OyunDurumu>()(
           sayac: baslat(sayacKur(ayarlar.sure)),
           kilitli: false,
           seriBittiSoruluyor: false,
+          cikisSoruluyor: false,
           sonOlay: null,
         });
         kartiIlerlet(ayarla, oku);
@@ -187,6 +190,7 @@ export const oyunDeposu = create<OyunDurumu>()(
       aksiyonIsle: (tur) => {
         const durum = oku();
         if (durum.kilitli || !durum.deste || durum.seriBittiSoruluyor) return;
+        if (durum.cikisSoruluyor) return;
 
         if (tur === 'pas') {
           const izin = pasBasilabilirMi(
@@ -226,7 +230,8 @@ export const oyunDeposu = create<OyunDurumu>()(
 
       saniyeIlerlet: () => {
         const durum = oku();
-        if (durum.seriBittiSoruluyor) return;
+        // Cikis onayi acikken de saniye islemez - oyuncu karar veriyor
+        if (durum.seriBittiSoruluyor || durum.cikisSoruluyor) return;
 
         const { durum: yeniSayac, olay } = saniyeGec(durum.sayac, durum.ayarlar);
         ayarla({ sayac: yeniSayac });
@@ -256,13 +261,20 @@ export const oyunDeposu = create<OyunDurumu>()(
       },
 
       /**
-       * Sureyi dondurur. Cikis onayi sorulurken kullanilir -
-       * oyuncu karar verirken saniye islemesin.
+       * Cikis onayini acar.
+       *
+       * Sure ayrica duraklatilmaz - saniyeIlerlet bu bayragi gorunce
+       * zaten islemez. calisiyorMu'yu burada da yazsaydik ayni bayragin
+       * iki sahibi olurdu ve hangisi son devam ettirirse o kazanirdi.
+       * Sure biten bir turda pencere acilmaz.
        */
-      turuDuraklat: () => ayarla({ sayac: duraklat(oku().sayac) }),
+      cikisiSor: () => {
+        const durum = oku();
+        if (durum.seriBittiSoruluyor || !durum.sayac.calisiyorMu) return;
+        ayarla({ cikisSoruluyor: true });
+      },
 
-      /** Duraklatilmis sureyi kaldigi saniyeden surdurur. */
-      turaDevamEt: () => ayarla({ sayac: devamEt(oku().sayac) }),
+      cikisiKapat: () => ayarla({ cikisSoruluyor: false }),
 
       siradakiTakimaGec: () =>
         ayarla((d) => ({
@@ -297,6 +309,7 @@ export const oyunDeposu = create<OyunDurumu>()(
           turSayaclari: BOS_TUR,
           sonOlay: null,
           seriBittiSoruluyor: false,
+          cikisSoruluyor: false,
         })),
 
       yeniOyun: () => {

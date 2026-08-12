@@ -6,11 +6,8 @@
  * basmis hissi verir, gorsel sus degil - dokunusun kaydedildigini
  * anlatir.
  *
- * Ilk surumde bu etki borderBottomWidth'i canlandirarak yapiliyordu.
- * Kenarlik bir yerlesim ozelligi - her karede kutu yeniden olculuyor,
- * cihazda butonun bir an kaybolmasina yol acabiliyor. Simdi disarida
- * sabit renkli bir "taban" var, buton onun icinde translateY ile
- * asagi kayiyor. Hicbir yerlesim ozelligi canlandirilmiyor.
+ * Yuva duzeninin gerekcesi Yuva.tsx icinde anlatiliyor - kisaca
+ * hicbir yerlesim ozelligi canlandirilmiyor, sadece transform.
  *
  * Pas hakki bitince veya son kart modunda buton kilit ikonuna doner.
  */
@@ -28,6 +25,7 @@ import { BOSLUK, YARICAP } from '../tema/golgeler';
 import { RENK } from '../tema/renkler';
 import { BOYUT } from '../tema/yazitipi';
 import { Yazi } from './Yazi';
+import { Yuva } from './Yuva';
 
 export type AksiyonTipi = 'yanlis' | 'pas' | 'dogru';
 
@@ -109,8 +107,12 @@ export function AksiyonButonu({
       accessibilityState={{ disabled: kilitli }}
       style={durum.dokunmaAlani}
     >
-      <View style={[durum.taban, kilitli && durum.kilitli]}>
-        <View style={[durum.kalinlik, { backgroundColor: bicim.alt }]} />
+      <Yuva
+        derinlik={DERINLIK}
+        altRenk={bicim.alt}
+        yaricap={YARICAP.normal}
+        style={kilitli && durum.kilitli}
+      >
         <Animated.View
           style={[durum.govde, { backgroundColor: bicim.zemin }, govdeStil]}
         >
@@ -134,27 +136,13 @@ export function AksiyonButonu({
             {sayac}
           </Yazi>
         </Animated.View>
-      </View>
+      </Yuva>
     </Pressable>
   );
 }
 
 const durum = StyleSheet.create({
   dokunmaAlani: { flex: 1 },
-  // Butonun oturdugu yuva. Alt boslugu kadar kalinlik gorunur.
-  taban: {
-    borderRadius: YARICAP.normal,
-    paddingBottom: DERINLIK,
-    overflow: 'hidden',
-  },
-  // Yuvanin gorunen kalinligi. Buton basilinca ustune iner.
-  kalinlik: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: DERINLIK,
-  },
   govde: {
     alignItems: 'center',
     gap: BOSLUK.minik + 2,
