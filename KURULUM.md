@@ -74,8 +74,12 @@ expo.dev'de açtığın hesabın e-postası ve şifresi sorulur.
 ### Adım 3 · iOS derlemesini başlat
 
 ```powershell
-npx eas-cli build --platform ios --profile onizleme
+npx eas-cli build --platform ios --profile yayin
 ```
+
+> **Profil `yayin` olmalı, `onizleme` değil.** `onizleme` sadece kayıtlı
+> cihazlara link ile kurulan ad-hoc paket üretir ve TestFlight'a
+> gönderilemez. TestFlight App Store imzası ister, onu `yayin` verir.
 
 Sırayla şunlar sorulacak:
 

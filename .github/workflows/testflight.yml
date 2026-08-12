@@ -44,7 +44,7 @@ jobs:
         run: npm ci
 
       - name: iOS derle
-        run: eas build --platform ios --profile onizleme --non-interactive --wait
+        run: eas build --platform ios --profile yayin --non-interactive --wait
 
       - name: TestFlight a gonder
         if: ${{ inputs.gonder == 'evet' }}
