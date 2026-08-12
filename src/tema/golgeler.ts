@@ -52,3 +52,14 @@ export const BOSLUK = {
   buyuk: 22,
   devasa: 32,
 } as const;
+
+/**
+ * Ekranlarin yan boslugu.
+ *
+ * Kenara kadar akan yatay raylar bunu kendi ic bosluklari olarak kullanir.
+ * Sabit olmasinin sebebi su: ray sayfa boslugunu negatif marjla asmaya
+ * calisirsa ust ScrollView onu kendi sinirinda kirpar ve pullar ortasindan
+ * kesik gorunur. Onun yerine sayfa boslugunu tek tek ogeler tasir, rayin
+ * kendisi tam genislikte kalir.
+ */
+export const SAYFA_YAN = 22;

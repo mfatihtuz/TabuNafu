@@ -35,7 +35,21 @@ const KAYNAKLAR: Record<SesAdi, number> = {
   sonkart: require('../../assets/ses/sonkart.wav'),
 };
 
-const calarlar = new Map<SesAdi, AudioPlayer>();
+/**
+ * Her ses icin kac calar tutulacagi.
+ *
+ * Tek calarla ust uste basilinca onceki calma seekTo(0) ile ortasindan
+ * kesiliyor ve ses "tam cikmamis" gibi duyuluyordu. Havuzdaki calarlar
+ * sirayla kullanilinca iki basma iki ayri calarda calisir, sesler
+ * birbirini kesmeden ust uste biner.
+ *
+ * Ucu yetiyor: en hizli basma bile ses suresinden kisa araliklarla ucten
+ * fazla ust uste gelmiyor.
+ */
+const HAVUZ_BOYU = 3;
+
+const calarlar = new Map<SesAdi, AudioPlayer[]>();
+const siradaki = new Map<SesAdi, number>();
 let hazirlandi = false;
 
 /** Uygulama acilisinda bir kez cagrilir. */
@@ -55,24 +69,38 @@ export async function sesleriHazirla(): Promise<void> {
   }
 
   for (const ad of Object.keys(KAYNAKLAR) as SesAdi[]) {
-    try {
-      calarlar.set(ad, createAudioPlayer(KAYNAKLAR[ad]));
-    } catch {
-      // Tek bir ses yuklenemezse digerleri calismaya devam etsin
+    const havuz: AudioPlayer[] = [];
+    for (let i = 0; i < HAVUZ_BOYU; i++) {
+      try {
+        havuz.push(createAudioPlayer(KAYNAKLAR[ad]));
+      } catch {
+        // Tek bir calar acilamazsa havuzdaki digerleri yeter
+      }
     }
+    calarlar.set(ad, havuz);
+    siradaki.set(ad, 0);
   }
 }
 
 /**
  * Sesi bastan calar.
- * Ust uste basmalarda onceki calma kesilir - kart hizli gecerken
- * sesler birikip cakismasin.
+ *
+ * Havuzdaki calarlar sirayla kullanilir, boylece ust uste basmalarda
+ * sesler birbirini kesmez - iki dogru arka arkaya basildiginda ikisi de
+ * tam duyulur.
  */
 export function sesCal(ad: SesAdi, acikMi: boolean): void {
   if (!acikMi) return;
-  const calar = calarlar.get(ad);
+  const havuz = calarlar.get(ad);
+  if (!havuz || havuz.length === 0) return;
+
+  const sira = (siradaki.get(ad) ?? 0) % havuz.length;
+  siradaki.set(ad, sira + 1);
+
+  const calar = havuz[sira];
   if (!calar) return;
   try {
+    // Bu calar daha once kullanildiysa sonunda duruyordur, basa sar
     calar.seekTo(0);
     calar.play();
   } catch {
@@ -82,13 +110,16 @@ export function sesCal(ad: SesAdi, acikMi: boolean): void {
 
 /** Uygulama kapanirken bellegi birak. */
 export function sesleriBirak(): void {
-  for (const calar of calarlar.values()) {
-    try {
-      calar.remove();
-    } catch {
-      // Zaten birakilmis olabilir
+  for (const havuz of calarlar.values()) {
+    for (const calar of havuz) {
+      try {
+        calar.remove();
+      } catch {
+        // Zaten birakilmis olabilir
+      }
     }
   }
   calarlar.clear();
+  siradaki.clear();
   hazirlandi = false;
 }

@@ -20,7 +20,7 @@ import {
   TUR_SECENEKLERI,
   type BitisModu,
 } from '../../src/oyun/tipler';
-import { BOSLUK, YARICAP } from '../../src/tema/golgeler';
+import { BOSLUK, SAYFA_YAN, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
 import { BOYUT } from '../../src/tema/yazitipi';
 
@@ -41,10 +41,17 @@ export default function AyarEkrani() {
   return (
     <Zemin>
       <View style={[durum.kok, { paddingTop: kenar.top + 18, paddingBottom: kenar.bottom + 18 }]}>
-        <GeriButonu onPress={() => yonlendir.back()} />
-        <Yazi tur="baslik" boyut={BOYUT.baslik} style={durum.baslik}>
-          Oyun Ayarları
-        </Yazi>
+        {/*
+          Yan bosluk koke degil ogelere veriliyor. Boylece dikey ScrollView
+          tam genislikte kalir ve icindeki yatay raylari kendi sinirinda
+          kirpmaz - raylar ekran kenarina kadar akabilir.
+        */}
+        <View style={durum.yanBosluklu}>
+          <GeriButonu onPress={() => yonlendir.back()} />
+          <Yazi tur="baslik" boyut={BOYUT.baslik} style={durum.baslik}>
+            Oyun Ayarları
+          </Yazi>
+        </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={durum.liste}>
           <Secici
@@ -66,28 +73,30 @@ export default function AyarEkrani() {
           />
 
           <View style={durum.blok}>
-            <UstYazi>OYUN NASIL BİTSİN</UstYazi>
-            <View style={durum.segment}>
-              {MODLAR.map((m) => {
-                const secili = ayarlar.bitisModu === m.kimlik;
-                return (
-                  <Pressable
-                    key={m.kimlik}
-                    onPress={() => ayarGuncelle({ bitisModu: m.kimlik })}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: secili }}
-                    style={[durum.segmentDugme, secili && durum.segmentSecili]}
-                  >
-                    <Yazi
-                      tur="cokKalin"
-                      boyut={BOYUT.notr - 0.5}
-                      renk={secili ? RENK.pirincUstu : RENK.sis}
+            <View style={[durum.yanBosluklu, durum.blokBasi]}>
+              <UstYazi>OYUN NASIL BİTSİN</UstYazi>
+              <View style={durum.segment}>
+                {MODLAR.map((m) => {
+                  const secili = ayarlar.bitisModu === m.kimlik;
+                  return (
+                    <Pressable
+                      key={m.kimlik}
+                      onPress={() => ayarGuncelle({ bitisModu: m.kimlik })}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: secili }}
+                      style={[durum.segmentDugme, secili && durum.segmentSecili]}
                     >
-                      {m.etiket}
-                    </Yazi>
-                  </Pressable>
-                );
-              })}
+                      <Yazi
+                        tur="cokKalin"
+                        boyut={BOYUT.notr - 0.5}
+                        renk={secili ? RENK.pirincUstu : RENK.sis}
+                      >
+                        {m.etiket}
+                      </Yazi>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
 
             {ayarlar.bitisModu === 'puan' ? (
@@ -112,19 +121,21 @@ export default function AyarEkrani() {
             ) : null}
 
             {ayarlar.bitisModu === 'sinirsiz' ? (
-              <Yazi boyut={BOYUT.notr} renk={RENK.sis}>
+              <Yazi boyut={BOYUT.notr} renk={RENK.sis} style={durum.yanBosluklu}>
                 Kazanan ilan edilmez. Siz bırakana kadar puan sayılır.
               </Yazi>
             ) : null}
           </View>
 
-          <Toggle
-            baslik="Son Kart Hakkı"
-            aciklama="Süre bitince ekrandaki kart için birkaç saniye daha. Pas kilitlenir."
-            acik={ayarlar.sonKartHakki}
-            titresimAcik={titresim}
-            onDegis={(sonKartHakki) => ayarGuncelle({ sonKartHakki })}
-          />
+          <View style={durum.yanBosluklu}>
+            <Toggle
+              baslik="Son Kart Hakkı"
+              aciklama="Süre bitince ekrandaki kart için birkaç saniye daha. Pas kilitlenir."
+              acik={ayarlar.sonKartHakki}
+              titresimAcik={titresim}
+              onDegis={(sonKartHakki) => ayarGuncelle({ sonKartHakki })}
+            />
+          </View>
 
           {ayarlar.sonKartHakki ? (
             <Secici
@@ -137,37 +148,44 @@ export default function AyarEkrani() {
             />
           ) : null}
 
-          <Toggle
-            baslik="Ses Efektleri"
-            acik={ayarlar.sesAcik}
-            titresimAcik={titresim}
-            onDegis={(sesAcik) => ayarGuncelle({ sesAcik })}
-          />
-          <Toggle
-            baslik="Titreşim"
-            acik={ayarlar.titresimAcik}
-            titresimAcik={titresim}
-            onDegis={(titresimAcik) => ayarGuncelle({ titresimAcik })}
-          />
+          <View style={[durum.yanBosluklu, durum.blokBasi]}>
+            <Toggle
+              baslik="Ses Efektleri"
+              acik={ayarlar.sesAcik}
+              titresimAcik={titresim}
+              onDegis={(sesAcik) => ayarGuncelle({ sesAcik })}
+            />
+            <Toggle
+              baslik="Titreşim"
+              acik={ayarlar.titresimAcik}
+              titresimAcik={titresim}
+              onDegis={(titresimAcik) => ayarGuncelle({ titresimAcik })}
+            />
+          </View>
         </ScrollView>
 
-        <Buton
-          metin="Kategori Seç"
-          ikon="arrow-right"
-          ikonSagda
-          titresimAcik={titresim}
-          onPress={() => yonlendir.push('/kurulum/kategori')}
-        />
+        <View style={durum.yanBosluklu}>
+          <Buton
+            metin="Kategori Seç"
+            ikon="arrow-right"
+            ikonSagda
+            titresimAcik={titresim}
+            onPress={() => yonlendir.push('/kurulum/kategori')}
+          />
+        </View>
       </View>
     </Zemin>
   );
 }
 
 const durum = StyleSheet.create({
-  kok: { flex: 1, paddingHorizontal: 22 },
+  // Yan bosluk yok - yatay raylarin kenara kadar akmasi icin gerekli
+  kok: { flex: 1 },
+  yanBosluklu: { paddingHorizontal: SAYFA_YAN },
   baslik: { marginBottom: BOSLUK.orta + 2 },
   liste: { gap: BOSLUK.buyuk, paddingBottom: BOSLUK.orta },
   blok: { gap: BOSLUK.kucuk + 1 },
+  blokBasi: { gap: BOSLUK.kucuk + 1 },
   segment: {
     flexDirection: 'row',
     gap: 5,

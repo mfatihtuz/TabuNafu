@@ -15,7 +15,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { BOSLUK, YARICAP } from '../tema/golgeler';
+import { BOSLUK, SAYFA_YAN, YARICAP } from '../tema/golgeler';
 import { RENK } from '../tema/renkler';
 import { BOYUT } from '../tema/yazitipi';
 import { UstYazi, Yazi } from './Yazi';
@@ -54,14 +54,14 @@ export function Secici({
       </View>
 
       {/*
-        Ray ekranin tam genisliginde akar, ic bosluk contentContainer'da.
-        Boylece kaydirirken pullar ekran kenarinda yarim kesik durmaz -
-        ilk cihaz testinde solda yarim bir pul goze batiyordu.
+        Ray tam genislikte kalir, sayfa boslugunu contentContainer tasir.
+        Negatif marjla sayfa boslugunu asmayi denemiyoruz - ust ScrollView
+        icerigini kendi sinirinda kirptigi icin pullar ekran kenarina
+        varmadan ortasindan kesiliyordu.
       */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={durum.rayDis}
         contentContainerStyle={durum.ray}
         // Secili degeri gorunur tutmak icin en yakin pula yaslanir
         snapToAlignment="center"
@@ -128,12 +128,12 @@ const durum = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',
+    // Baslik satiri sayfa boslugunu kendisi tasir, ray tasimaz
+    paddingHorizontal: SAYFA_YAN,
   },
   degerAlani: { flexDirection: 'row', alignItems: 'baseline' },
-  // Ekranin yan boslugunu asarak kenara kadar uzanir
-  rayDis: { marginHorizontal: -22 },
   // Ic bosluk burada: ilk ve son pul kenara yapismaz
-  ray: { gap: BOSLUK.kucuk, paddingVertical: 4, paddingHorizontal: 22 },
+  ray: { gap: BOSLUK.kucuk, paddingVertical: 4, paddingHorizontal: SAYFA_YAN },
   pul: {
     minWidth: 58,
     // Dokunma hedefi 44px esiginin uzerinde

@@ -7,4 +7,4 @@
 export const SURUM = '0.2.0';
 
 /** Kaynak dosyalarin ozeti. Cihazdaki kodu kesin olarak tanimlar. */
-export const YAPIM = 'a9c41ee';
+export const YAPIM = '9e87d2f';
