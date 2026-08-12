@@ -84,6 +84,8 @@ export type OyunDurumu = {
   aksiyonIsle: (tur: AksiyonTuru) => void;
   saniyeIlerlet: () => void;
   turuBitir: () => void;
+  turuDuraklat: () => void;
+  turaDevamEt: () => void;
   siradakiTakimaGec: () => void;
 
   yenidenKar: () => void;
@@ -252,6 +254,15 @@ export const oyunDeposu = create<OyunDurumu>()(
           sonOlay: { tur: 'turBitti' },
         });
       },
+
+      /**
+       * Sureyi dondurur. Cikis onayi sorulurken kullanilir -
+       * oyuncu karar verirken saniye islemesin.
+       */
+      turuDuraklat: () => ayarla({ sayac: duraklat(oku().sayac) }),
+
+      /** Duraklatilmis sureyi kaldigi saniyeden surdurur. */
+      turaDevamEt: () => ayarla({ sayac: devamEt(oku().sayac) }),
 
       siradakiTakimaGec: () =>
         ayarla((d) => ({

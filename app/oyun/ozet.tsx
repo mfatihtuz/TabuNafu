@@ -8,10 +8,12 @@
  */
 
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Buton } from '../../src/arayuz/Buton';
+import { Buton, CikisButonu } from '../../src/arayuz/Buton';
+import { Modal3D } from '../../src/arayuz/Modal3D';
 import { UstYazi, Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
 import { Ikon } from '../../src/cizimler/Ikon';
@@ -31,6 +33,9 @@ export default function OzetEkrani() {
   const bitti = oyunDeposu(oyunBittiMiSec);
   const titresimAcik = oyunDeposu((d) => d.ayarlar.titresimAcik);
   const siradakiTakimaGec = oyunDeposu((d) => d.siradakiTakimaGec);
+  const oyunuSifirla = oyunDeposu((d) => d.oyunuSifirla);
+
+  const [cikisSoruluyor, setCikisSoruluyor] = useState(false);
 
   const puan = turPuani(sayaclar);
   const enYuksek = Math.max(...takimlar.map((t) => t.puan));
@@ -44,6 +49,11 @@ export default function OzetEkrani() {
   return (
     <Zemin>
       <View style={[durum.kok, { paddingTop: kenar.top + 18, paddingBottom: kenar.bottom + 18 }]}>
+        {/* Turlar arasi cikis yolu - oyun burada guvenle birakilabilir */}
+        <View style={durum.ustSatir}>
+          <CikisButonu onPress={() => setCikisSoruluyor(true)} />
+        </View>
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={durum.icerik}
@@ -112,12 +122,30 @@ export default function OzetEkrani() {
           }}
         />
       </View>
+
+      <Modal3D
+        acik={cikisSoruluyor}
+        ikon="house"
+        ikonRenk={RENK.yanlis}
+        baslik="Oyundan çıkılsın mı"
+        metin="Tüm puanlar silinir ve ana ekrana dönülür."
+        birinci="Oyuna Devam Et"
+        ikinci="Çık ve Sil"
+        titresimAcik={titresimAcik}
+        onBirinci={() => setCikisSoruluyor(false)}
+        onIkinci={() => {
+          setCikisSoruluyor(false);
+          oyunuSifirla();
+          yonlendir.replace('/');
+        }}
+      />
     </Zemin>
   );
 }
 
 const durum = StyleSheet.create({
   kok: { flex: 1, paddingHorizontal: 22 },
+  ustSatir: { flexDirection: 'row', justifyContent: 'flex-end' },
   icerik: { flexGrow: 1, justifyContent: 'center', gap: BOSLUK.orta },
   tepe: { alignItems: 'center', gap: 2, paddingVertical: 18 },
   puanSatir: { flexDirection: 'row', alignItems: 'baseline' },

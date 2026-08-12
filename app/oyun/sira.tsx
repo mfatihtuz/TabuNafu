@@ -10,7 +10,8 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 
-import { Buton } from '../../src/arayuz/Buton';
+import { Buton, CikisButonu, GeriButonu } from '../../src/arayuz/Buton';
+import { Modal3D } from '../../src/arayuz/Modal3D';
 import { Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
 import { anlatanAdiSec, aktifTakimSec, oyunDeposu } from '../../src/oyun/durum';
@@ -29,8 +30,10 @@ export default function SiraEkrani() {
   const sesAcik = oyunDeposu((d) => d.ayarlar.sesAcik);
   const titresimAcik = oyunDeposu((d) => d.ayarlar.titresimAcik);
   const turBaslat = oyunDeposu((d) => d.turBaslat);
+  const oyunuSifirla = oyunDeposu((d) => d.oyunuSifirla);
 
   const [geriSayim, setGeriSayim] = useState<number | null>(null);
+  const [cikisSoruluyor, setCikisSoruluyor] = useState(false);
   const zamanlayici = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => () => {
@@ -74,6 +77,15 @@ export default function SiraEkrani() {
   return (
     <Zemin>
       <View style={[durum.kok, { paddingTop: kenar.top + 24, paddingBottom: kenar.bottom + 24 }]}>
+        {/*
+          Tur baslamadan once cikis yollari burada. Kategori degistirmek
+          puanlari silmez, oyundan cikmak siler - ikisi ayri dugme.
+        */}
+        <View style={durum.ustSatir}>
+          <GeriButonu onPress={() => yonlendir.replace('/kurulum/kategori')} />
+          <CikisButonu onPress={() => setCikisSoruluyor(true)} />
+        </View>
+
         <Animated.View entering={FadeIn.duration(300)} style={durum.orta}>
           <View style={[durum.rozet, { backgroundColor: (takim?.renk ?? RENK.pirinc) + '2E' }]}>
             <Yazi tur="cokKalin" boyut={BOYUT.kucuk} harfAraligi={1.8}
@@ -91,12 +103,34 @@ export default function SiraEkrani() {
 
         <Buton metin="Başla" ikon="play" titresimAcik={titresimAcik} onPress={basla} />
       </View>
+
+      <Modal3D
+        acik={cikisSoruluyor}
+        ikon="house"
+        ikonRenk={RENK.yanlis}
+        baslik="Oyundan çıkılsın mı"
+        metin="Tüm puanlar silinir ve ana ekrana dönülür."
+        birinci="Oyuna Devam Et"
+        ikinci="Çık ve Sil"
+        titresimAcik={titresimAcik}
+        onBirinci={() => setCikisSoruluyor(false)}
+        onIkinci={() => {
+          setCikisSoruluyor(false);
+          oyunuSifirla();
+          yonlendir.replace('/');
+        }}
+      />
     </Zemin>
   );
 }
 
 const durum = StyleSheet.create({
   kok: { flex: 1, paddingHorizontal: 22 },
+  ustSatir: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   orta: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: BOSLUK.orta },
   rozet: {
     paddingHorizontal: 18,

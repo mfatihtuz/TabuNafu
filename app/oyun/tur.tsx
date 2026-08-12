@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
 
 import { AksiyonButonu } from '../../src/arayuz/AksiyonButonu';
+import { CikisButonu } from '../../src/arayuz/Buton';
 import { Kart3D } from '../../src/arayuz/Kart3D';
 import { Modal3D } from '../../src/arayuz/Modal3D';
 import { SureHalkasi } from '../../src/arayuz/SureHalkasi';
@@ -50,6 +51,9 @@ export default function TurEkrani() {
   const yenidenKar = oyunDeposu((d) => d.yenidenKar);
   const turuBitir = oyunDeposu((d) => d.turuBitir);
   const olayTemizle = oyunDeposu((d) => d.olayTemizle);
+  const turuDuraklat = oyunDeposu((d) => d.turuDuraklat);
+  const turaDevamEt = oyunDeposu((d) => d.turaDevamEt);
+  const oyunuSifirla = oyunDeposu((d) => d.oyunuSifirla);
 
   /**
    * Bunlar ref degil state olmali. Ref degisimi yeniden cizim
@@ -58,6 +62,7 @@ export default function TurEkrani() {
    */
   const [kartSayaci, setKartSayaci] = useState(0);
   const [bildirim, setBildirim] = useState<string | null>(null);
+  const [cikisSoruluyor, setCikisSoruluyor] = useState(false);
 
   // Bildirim birkac saniye sonra kaybolur
   useEffect(() => {
@@ -112,10 +117,18 @@ export default function TurEkrani() {
     aksiyonIsle(tur);
   }
 
+  /** Cikis onayi acilir. Karar verilene kadar sure durur. */
+  function cikisiSor() {
+    if (seriBittiSoruluyor) return;
+    turuDuraklat();
+    setCikisSoruluyor(true);
+  }
+
   return (
     <Zemin>
       <View style={[durum.kok, { paddingTop: kenar.top + 16, paddingBottom: kenar.bottom + 16 }]}>
         <View style={durum.ustSatir}>
+          <CikisButonu onPress={cikisiSor} />
           <View style={durum.baslikAlani}>
             <Yazi tur="cokKalin" boyut={BOYUT.notr} harfAraligi={0.5} numberOfLines={1}>
               {trUpper(kategori.ad)}
@@ -177,6 +190,26 @@ export default function TurEkrani() {
           />
         </View>
       </View>
+
+      <Modal3D
+        acik={cikisSoruluyor}
+        ikon="house"
+        ikonRenk={RENK.yanlis}
+        baslik="Oyundan çıkılsın mı"
+        metin="Tur yarıda kalır ve tüm puanlar silinir. Ana ekrana dönülür."
+        birinci="Oyuna Devam Et"
+        ikinci="Çık ve Sil"
+        titresimAcik={ayarlar.titresimAcik}
+        onBirinci={() => {
+          setCikisSoruluyor(false);
+          turaDevamEt();
+        }}
+        onIkinci={() => {
+          setCikisSoruluyor(false);
+          oyunuSifirla();
+          yonlendir.replace('/');
+        }}
+      />
 
       <Modal3D
         acik={seriBittiSoruluyor}
