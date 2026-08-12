@@ -10,6 +10,7 @@ import { Buton } from '../src/arayuz/Buton';
 import { Yazi } from '../src/arayuz/Yazi';
 import { Zemin } from '../src/arayuz/Zemin';
 import { oyunDeposu } from '../src/oyun/durum';
+import { SURUM, YAPIM } from '../src/surum';
 import { BOSLUK, KART_GOLGE, YARICAP } from '../src/tema/golgeler';
 import { RENK } from '../src/tema/renkler';
 import { BOYUT } from '../src/tema/yazitipi';
@@ -68,6 +69,11 @@ export default function AnaEkran() {
             onPress={() => yonlendir.push('/nasil-oynanir')}
           />
         </View>
+
+        {/* Cihazdaki paketin hangi koddan derlendigini gosterir */}
+        <Yazi boyut={BOYUT.minik - 2} renk={RENK.sis} ortala style={durum.damga}>
+          {`s${SURUM} · ${YAPIM}`}
+        </Yazi>
       </View>
     </Zemin>
   );
@@ -97,4 +103,5 @@ const durum = StyleSheet.create({
   logoAna: { top: 32, right: 26, height: 8, backgroundColor: RENK.metinAna },
   aciklama: { maxWidth: 290, marginTop: BOSLUK.orta },
   menu: { gap: BOSLUK.notr },
+  damga: { marginTop: BOSLUK.orta, opacity: 0.45 },
 });

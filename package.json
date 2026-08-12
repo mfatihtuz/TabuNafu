@@ -16,7 +16,8 @@
     "validate:sounds": "python3 scripts/test-ses.py",
     "audit:layout": "node scripts/audit-yerlesim.mjs",
     "build:icons": "python3 scripts/build-ikon.py",
-    "dogrula": "npm run kontrol && npm test && npm run validate:words"
+    "build:version": "node scripts/surum-yaz.mjs",
+    "dogrula": "npm run build:version && npm run kontrol && npm test && npm run validate:words"
   },
   "dependencies": {
     "@expo-google-fonts/baloo-2": "^0.4.2",
