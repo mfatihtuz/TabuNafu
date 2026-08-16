@@ -58,7 +58,16 @@ export default function KazananEkrani() {
             {siraliTakimlar(takimlar).map((t, i) => (
               <View key={i} style={[durum.satir, t.puan === enYuksek && durum.lider]}>
                 <View style={[durum.nokta, { backgroundColor: t.renk }]} />
-                <Yazi tur="cokKalin" boyut={BOYUT.govde} style={durum.ad}>{t.ad}</Yazi>
+                <View style={durum.adAlani}>
+                  <Yazi tur="cokKalin" boyut={BOYUT.govde}>{t.ad}</Yazi>
+                  {/*
+                    Oyun boyunca biriken sayaclar. Skorun yaninda kucuk
+                    duruyor - once kim kazandi, sonra nasil oynandi.
+                  */}
+                  <Yazi boyut={BOYUT.minik} renk={RENK.sis}>
+                    {`${t.toplam.dogru} doğru · ${t.toplam.yanlis} yanlış · ${t.toplam.pas} pas · en iyi tur ${t.enIyiTur}`}
+                  </Yazi>
+                </View>
                 <Yazi tur="baslik" boyut={BOYUT.baslik} renk={t.renk}>{t.puan}</Yazi>
               </View>
             ))}
@@ -117,6 +126,6 @@ const durum = StyleSheet.create({
   },
   lider: { borderColor: RENK.pirinc, backgroundColor: 'rgba(212,160,80,0.13)' },
   nokta: { width: 26, height: 26, borderRadius: YARICAP.kucuk - 4 },
-  ad: { flex: 1 },
+  adAlani: { flex: 1, gap: 2 },
   butonlar: { gap: BOSLUK.kucuk + 1 },
 });

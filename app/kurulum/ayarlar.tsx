@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Buton, GeriButonu } from '../../src/arayuz/Buton';
+import { BagButonu, Buton, GeriButonu } from '../../src/arayuz/Buton';
 import { Secici } from '../../src/arayuz/Secici';
 import { Toggle } from '../../src/arayuz/Toggle';
 import { UstYazi, Yazi } from '../../src/arayuz/Yazi';
@@ -18,7 +18,9 @@ import {
   SON_KART_SURE_SECENEKLERI,
   SURE_SECENEKLERI,
   TUR_SECENEKLERI,
+  ZORLUK_ETIKETLERI,
   type BitisModu,
+  type ZorlukModu,
 } from '../../src/oyun/tipler';
 import { BOSLUK, SAYFA_YAN, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
@@ -30,6 +32,14 @@ const MODLAR: readonly { kimlik: BitisModu; etiket: string }[] = [
   { kimlik: 'sinirsiz', etiket: 'Sınırsız' },
 ];
 
+const ZORLUKLAR: readonly ZorlukModu[] = ['cocuk', 'karisik', 'zor'];
+
+const ZORLUK_ACIKLAMA: Record<ZorlukModu, string> = {
+  cocuk: 'Yalnızca en kolay kelimeler. Küçüklerle oynarken.',
+  karisik: 'Destenin tamamı. Kolaydan zora her seviye gelir.',
+  zor: 'Kolay kelimeler çıkarılır. Deneyimli oyuncular için.',
+};
+
 export default function AyarEkrani() {
   const yonlendir = useRouter();
   const kenar = useSafeAreaInsets();
@@ -37,6 +47,8 @@ export default function AyarEkrani() {
   const ayarlar = oyunDeposu((d) => d.ayarlar);
   const ayarGuncelle = oyunDeposu((d) => d.ayarGuncelle);
   const titresim = ayarlar.titresimAcik;
+  const kendiSayi = oyunDeposu((d) => d.kendiKartlar.length);
+  const bildirilenSayi = oyunDeposu((d) => d.bildirilenler.length);
 
   return (
     <Zemin>
@@ -71,6 +83,37 @@ export default function AyarEkrani() {
             titresimAcik={titresim}
             onSec={(pasHakki) => ayarGuncelle({ pasHakki })}
           />
+
+          <View style={durum.blok}>
+            <View style={[durum.yanBosluklu, durum.blokBasi]}>
+              <UstYazi>KELİME ZORLUĞU</UstYazi>
+              <View style={durum.segment}>
+                {ZORLUKLAR.map((z) => {
+                  const secili = ayarlar.zorlukModu === z;
+                  return (
+                    <Pressable
+                      key={z}
+                      onPress={() => ayarGuncelle({ zorlukModu: z })}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: secili }}
+                      style={[durum.segmentDugme, secili && durum.segmentSecili]}
+                    >
+                      <Yazi
+                        tur="cokKalin"
+                        boyut={BOYUT.notr - 0.5}
+                        renk={secili ? RENK.pirincUstu : RENK.sis}
+                      >
+                        {ZORLUK_ETIKETLERI[z]}
+                      </Yazi>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <Yazi boyut={BOYUT.kucuk} renk={RENK.sis}>
+                {ZORLUK_ACIKLAMA[ayarlar.zorlukModu]}
+              </Yazi>
+            </View>
+          </View>
 
           <View style={durum.blok}>
             <View style={[durum.yanBosluklu, durum.blokBasi]}>
@@ -161,8 +204,30 @@ export default function AyarEkrani() {
               titresimAcik={titresim}
               onDegis={(titresimAcik) => ayarGuncelle({ titresimAcik })}
             />
+            <Toggle
+              baslik="Sol El Modu"
+              aciklama="Doğru ve yanlış butonlarının yeri değişir."
+              acik={ayarlar.solElModu}
+              titresimAcik={titresim}
+              onDegis={(solElModu) => ayarGuncelle({ solElModu })}
+            />
           </View>
         </ScrollView>
+
+        <View style={[durum.yanBosluklu, durum.altMenu]}>
+          <BagButonu
+            metin={`Kelimelerim${kendiSayi > 0 ? ` (${kendiSayi})` : ''}`}
+            ikon="feather"
+            onPress={() => yonlendir.push('/kurulum/kelimelerim')}
+          />
+          {bildirilenSayi > 0 ? (
+            <BagButonu
+              metin={`Bildirilen kartlar (${bildirilenSayi})`}
+              ikon="scroll-text"
+              onPress={() => yonlendir.push('/kurulum/bildirilenler')}
+            />
+          ) : null}
+        </View>
 
         <View style={durum.yanBosluklu}>
           <Buton
@@ -182,6 +247,7 @@ const durum = StyleSheet.create({
   // Yan bosluk yok - yatay raylarin kenara kadar akmasi icin gerekli
   kok: { flex: 1 },
   yanBosluklu: { paddingHorizontal: SAYFA_YAN },
+  altMenu: { flexDirection: 'row', flexWrap: 'wrap', gap: BOSLUK.orta },
   baslik: { marginBottom: BOSLUK.orta + 2 },
   liste: { gap: BOSLUK.buyuk, paddingBottom: BOSLUK.orta },
   blok: { gap: BOSLUK.kucuk + 1 },

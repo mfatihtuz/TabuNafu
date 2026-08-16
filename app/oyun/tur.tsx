@@ -8,6 +8,7 @@
  * Ekran tur boyunca uyanik tutulur - anlatirken sonmesin.
  */
 
+import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -16,15 +17,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
 
 import { AksiyonButonu } from '../../src/arayuz/AksiyonButonu';
-import { CikisButonu } from '../../src/arayuz/Buton';
+import { BagButonu, CikisButonu } from '../../src/arayuz/Buton';
 import { CikisOnayi } from '../../src/arayuz/CikisOnayi';
 import { Kart3D } from '../../src/arayuz/Kart3D';
 import { Modal3D } from '../../src/arayuz/Modal3D';
 import { SureHalkasi } from '../../src/arayuz/SureHalkasi';
 import { Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
-import { anlatanAdiSec, oyunDeposu } from '../../src/oyun/durum';
+import { anlatanAdiSec, geriAlinabilirMiSec, oyunDeposu } from '../../src/oyun/durum';
 import { kategoriBul } from '../../src/oyun/kategoriler';
+import { kalanKart } from '../../src/oyun/deste';
 import { sesCal } from '../../src/oyun/sesler';
 import { acilDurumMu, halkaOrani, pasBasilabilirMi } from '../../src/oyun/sayac';
 import { BOSLUK, YARICAP } from '../../src/tema/golgeler';
@@ -55,6 +57,9 @@ export default function TurEkrani() {
   const cikisSoruluyor = oyunDeposu((d) => d.cikisSoruluyor);
   const cikisiSor = oyunDeposu((d) => d.cikisiSor);
   const cikisiKapat = oyunDeposu((d) => d.cikisiKapat);
+  const geriAlinabilir = oyunDeposu(geriAlinabilirMiSec);
+  const geriAl = oyunDeposu((d) => d.geriAl);
+  const kartBildir = oyunDeposu((d) => d.kartBildir);
 
   /**
    * Bunlar ref degil state olmali. Ref degisimi yeniden cizim
@@ -128,7 +133,7 @@ export default function TurEkrani() {
               {trUpper(kategori.ad)}
             </Yazi>
             <Yazi tur="kalin" boyut={BOYUT.kucuk} renk={RENK.sis} numberOfLines={1}>
-              {anlatan}
+              {`${anlatan}  ·  ${deste ? kalanKart(deste) : 0} kart kaldı`}
             </Yazi>
           </View>
           <SureHalkasi
@@ -146,11 +151,19 @@ export default function TurEkrani() {
               sonKartMi={sayac.sonKartModuAktif}
               pasTuruMu={deste?.pasTuruAktif ?? false}
               cevirmeAnahtari={kartSayaci}
+              onUzunBas={() => {
+                if (!kart) return;
+                kartBildir(kart);
+                setBildirim('Kart bildirildi, ayarlardan görebilirsin');
+                if (ayarlar.titresimAcik) void Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success,
+                );
+              }}
             />
           ) : null}
         </View>
 
-        {bildirim && deste?.pasTuruAktif ? (
+        {bildirim ? (
           <Animated.View
             entering={FadeInDown.duration(280)}
             exiting={FadeOut.duration(200)}
@@ -162,7 +175,17 @@ export default function TurEkrani() {
           </Animated.View>
         ) : null}
 
-        <View style={durum.aksiyonlar}>
+        {/*
+          Geri al satiri sabit yukseklikte - dugme gelip gidince
+          kartin ve aksiyon butonlarinin yeri oynamasin.
+        */}
+        <View style={durum.geriAlSatiri}>
+          {geriAlinabilir ? (
+            <BagButonu metin="Son basışı geri al" ikon="chevron-left" onPress={geriAl} />
+          ) : null}
+        </View>
+
+        <View style={[durum.aksiyonlar, ayarlar.solElModu && durum.aksiyonlarTers]}>
           <AksiyonButonu
             tip="yanlis"
             sayac={String(sayaclar.yanlis)}
@@ -229,9 +252,12 @@ const durum = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: YARICAP.tam,
   },
+  geriAlSatiri: { height: 44, alignItems: 'center', justifyContent: 'center' },
   aksiyonlar: {
     flexDirection: 'row',
     gap: 11,
-    marginTop: BOSLUK.orta,
+    marginTop: BOSLUK.kucuk,
   },
+  // Sol elle tutanlar icin DOGRU basparmaga yakin tarafa gecer
+  aksiyonlarTers: { flexDirection: 'row-reverse' },
 });

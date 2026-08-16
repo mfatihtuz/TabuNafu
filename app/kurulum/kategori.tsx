@@ -20,7 +20,7 @@ import { Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
 import { Ikon } from '../../src/cizimler/Ikon';
 import { oyunDeposu } from '../../src/oyun/durum';
-import { KARISIK, KATEGORILER, kartSayisi } from '../../src/oyun/kategoriler';
+import { KARISIK, KATEGORILER, KENDI, kartSayisi } from '../../src/oyun/kategoriler';
 import type { Kategori } from '../../src/oyun/tipler';
 import { BOSLUK, PANEL, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
@@ -35,6 +35,8 @@ export default function KategoriEkrani() {
   const kenar = useSafeAreaInsets();
   const { width: ekranGenisligi } = useWindowDimensions();
   const kategoriSec = oyunDeposu((d) => d.kategoriSec);
+  const zorlukModu = oyunDeposu((d) => d.ayarlar.zorlukModu);
+  const kendiKartlar = oyunDeposu((d) => d.kendiKartlar);
 
   /**
    * Kutucuk genisligi olcerek hesaplanir, yuzdeyle degil.
@@ -48,9 +50,11 @@ export default function KategoriEkrani() {
   // Kart sayilari her cizimde yeniden hesaplanmasin
   const sayilar = useMemo(() => {
     const harita: Record<string, number> = {};
-    for (const k of KATEGORILER) harita[k.kimlik] = kartSayisi(k.kimlik);
+    for (const k of KATEGORILER) harita[k.kimlik] = kartSayisi(k.kimlik, zorlukModu);
     return harita;
-  }, []);
+  }, [zorlukModu]);
+
+  const kendiSayi = kartSayisi(KENDI.kimlik, zorlukModu, kendiKartlar);
 
   function sec(kimlik: string) {
     kategoriSec(kimlik);
@@ -79,6 +83,15 @@ export default function KategoriEkrani() {
               onPress={() => sec(k.kimlik)}
             />
           ))}
+
+          {kendiKartlar.length > 0 ? (
+            <Kutucuk
+              kategori={KENDI}
+              adet={kendiSayi}
+              genislik={kutucukGenisligi}
+              onPress={() => sec(KENDI.kimlik)}
+            />
+          ) : null}
 
           <Pressable onPress={() => sec(KARISIK.kimlik)} style={durum.karisik}
                      accessibilityRole="button" accessibilityLabel="Karışık kategori">

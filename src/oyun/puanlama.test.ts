@@ -20,7 +20,10 @@ import {
 import { VARSAYILAN_AYARLAR, type Ayarlar, type Takim } from './tipler';
 
 function takim(ad: string, puan: number, anlatanSira = 0): Takim {
-  return { ad, renk: '#E01E37', puan, oyuncular: [], anlatanSira };
+  return {
+    ad, renk: '#E01E37', puan, oyuncular: [], anlatanSira,
+    toplam: BOS_TUR, enIyiTur: 0,
+  };
 }
 
 function ayarlarla(ustune: Partial<Ayarlar>): Ayarlar {

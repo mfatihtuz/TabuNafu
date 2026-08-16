@@ -50,6 +50,21 @@ const KURALLAR: readonly { ikon: string; baslik: string; metin: string }[] = [
     baslik: 'Süre bitince',
     metin: 'Korna çalar. Son kart hakkı açıksa ekrandaki kart için birkaç saniyen daha olur, o sırada pas kilitlidir.',
   },
+  {
+    ikon: 'chevron-left',
+    baslik: 'Yanlışlıkla bastıysan',
+    metin: 'Butonların üstünde beliren Son basışı geri al ile düzeltirsin. Puan, sayaç ve kart birlikte geri sarılır.',
+  },
+  {
+    ikon: 'scroll-text',
+    baslik: 'Bozuk kart gördüysen',
+    metin: 'Kartın üstüne uzun bas. Kart işaretlenir, ayarlardaki Bildirilen kartlar listesinde birikir.',
+  },
+  {
+    ikon: 'feather',
+    baslik: 'Kendi kelimelerin',
+    metin: 'Ayarlardan Kelimelerim ile kendi kartlarını yazarsın. Ayrı kategori olarak ve karışık destede gelirler.',
+  },
 ];
 
 export default function NasilOynanir() {

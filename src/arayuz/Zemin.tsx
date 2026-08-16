@@ -12,6 +12,16 @@ import { StyleSheet, View } from 'react-native';
 
 import { RENK } from '../tema/renkler';
 
+/**
+ * Icerigin cikabilecegi en fazla genislik.
+ *
+ * Tablette ekran telefonun iki kati - icerik serbest birakilirsa
+ * butonlar bir metre uzayip tuhaf gorunuyor ve kart alani cok
+ * yayvanlasiyor. Icerik ortada, telefon genisliginde tutuluyor.
+ * Zemin degradeleri tam ekran kaliyor.
+ */
+const EN_FAZLA_GENISLIK = 560;
+
 export function Zemin({ children }: { children: ReactNode }) {
   return (
     <View style={durum.kok}>
@@ -29,11 +39,12 @@ export function Zemin({ children }: { children: ReactNode }) {
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
       />
-      {children}
+      <View style={durum.icerik}>{children}</View>
     </View>
   );
 }
 
 const durum = StyleSheet.create({
   kok: { flex: 1, backgroundColor: RENK.zeminUst },
+  icerik: { flex: 1, width: '100%', maxWidth: EN_FAZLA_GENISLIK, alignSelf: 'center' },
 });

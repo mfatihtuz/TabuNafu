@@ -50,6 +50,10 @@ export type Takim = {
   oyuncular: string[];
   /** Takim icinde siradaki anlaticinin sirasi. Dongusel ilerler. */
   anlatanSira: number;
+  /** Oyun boyunca biriken sayaclar. Kazanan ekraninda gosterilir. */
+  toplam: TurSayaclari;
+  /** Tek turda alinan en yuksek puan. */
+  enIyiTur: number;
 };
 
 export type BitisModu = 'puan' | 'tur' | 'sinirsiz';

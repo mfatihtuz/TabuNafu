@@ -19,7 +19,7 @@
  */
 
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -40,6 +40,12 @@ type Ozellikler = {
   pasTuruMu?: boolean;
   /** Her degistiginde kart cevrilir. */
   cevirmeAnahtari: number;
+  /**
+   * Karta uzun basilinca calisir - bozuk kart bildirmek icin.
+   * Ayri bir dugme konmadi cunku tur ekraninda yer yok ve bildirme
+   * nadir bir eylem. Nasil Oynanir ekraninda anlatiliyor.
+   */
+  onUzunBas?: () => void;
 };
 
 /** Uzun kelimeler dar ekranda tasmasin diye font kademeli kuculur. */
@@ -55,6 +61,7 @@ export function Kart3D({
   sonKartMi = false,
   pasTuruMu = false,
   cevirmeAnahtari,
+  onUzunBas,
 }: Ozellikler) {
   // 0 = yerinde duruyor, 1 = degisim aninin ortasi
   const gecis = useSharedValue(0);
@@ -140,6 +147,21 @@ export function Kart3D({
           ))}
         </View>
       </View>
+
+      {/*
+        Uzun basma katmani EN USTTE olmali - alta konursa ustundeki
+        metin gorunumleri dokunusu yakalar. Normal dokunus bir sey yapmaz,
+        yalnizca uzun basma bozuk kart bildirir.
+      */}
+      {onUzunBas ? (
+        <Pressable
+          onLongPress={onUzunBas}
+          delayLongPress={700}
+          accessibilityRole="button"
+          accessibilityLabel={`${kelime}. Bozuk kartı bildirmek için uzun basın.`}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
     </Animated.View>
   );
 }

@@ -28,6 +28,7 @@ import {
   dogruEkle,
   oyunBittiMi,
   pasEkle,
+  turPuani,
   yanlisEkle,
 } from './puanlama';
 import {
@@ -108,6 +109,7 @@ export type OyunDurumu = {
   kendiKartEkle: (kart: HamKart) => void;
   kendiKartSil: (sira: number) => void;
   kartBildir: (kart: Kart) => void;
+  bildirimSil: (sira: number) => void;
   cikisiSor: () => void;
   cikisiKapat: () => void;
   siradakiTakimaGec: () => void;
@@ -126,6 +128,8 @@ function takimOlustur(sira: number): Takim {
     puan: 0,
     oyuncular: ['', ''],
     anlatanSira: 0,
+    toplam: BOS_TUR,
+    enIyiTur: 0,
   };
 }
 
@@ -341,13 +345,31 @@ export const oyunDeposu = create<OyunDurumu>()(
           return { bildirilenler: [...d.bildirilenler, ham] };
         }),
 
+      bildirimSil: (sira) =>
+        ayarla((d) => ({ bildirilenler: d.bildirilenler.filter((_, i) => i !== sira) })),
+
       turuBitir: () => {
         const durum = oku();
+        const tur = durum.turSayaclari;
+        const puan = turPuani(tur);
         ayarla({
           sayac: duraklat(durum.sayac),
           takimlar: durum.takimlar.map((t, i) =>
-            i === durum.siradakiTakim ? { ...t, anlatanSira: t.anlatanSira + 1 } : t,
+            i === durum.siradakiTakim
+              ? {
+                  ...t,
+                  anlatanSira: t.anlatanSira + 1,
+                  // Birikimli sayaclar kazanan ekraninda gosteriliyor
+                  toplam: {
+                    dogru: t.toplam.dogru + tur.dogru,
+                    yanlis: t.toplam.yanlis + tur.yanlis,
+                    pas: t.toplam.pas + tur.pas,
+                  },
+                  enIyiTur: Math.max(t.enIyiTur, puan),
+                }
+              : t,
           ),
+          geriAlinacak: null,
           sonOlay: { tur: 'turBitti' },
         });
       },
@@ -397,7 +419,9 @@ export const oyunDeposu = create<OyunDurumu>()(
 
       oyunuSifirla: () =>
         ayarla((d) => ({
-          takimlar: d.takimlar.map((t) => ({ ...t, puan: 0, anlatanSira: 0 })),
+          takimlar: d.takimlar.map((t) => ({
+            ...t, puan: 0, anlatanSira: 0, toplam: BOS_TUR, enIyiTur: 0,
+          })),
           siradakiTakim: 0,
           deste: null,
           aktifKart: null,
@@ -415,6 +439,25 @@ export const oyunDeposu = create<OyunDurumu>()(
     {
       name: 'nafutabu-oyun',
       storage: createJSONStorage(() => AsyncStorage),
+      /**
+       * Surum 1: takimlara birikimli sayaclar, ayarlara zorluk ve sol el
+       * eklendi. Diskteki eski kayitta bu alanlar yok - dokunulmazsa
+       * kazanan ekrani t.toplam.dogru okurken cokerdi.
+       */
+      version: 1,
+      migrate: (kayit) => {
+        const eski = kayit as Partial<OyunDurumu> | undefined;
+        if (!eski) return {} as OyunDurumu;
+        return {
+          ...eski,
+          ayarlar: { ...VARSAYILAN_AYARLAR, ...(eski.ayarlar ?? {}) },
+          takimlar: (eski.takimlar ?? []).map((t) => ({
+            ...t,
+            toplam: t.toplam ?? BOS_TUR,
+            enIyiTur: t.enIyiTur ?? 0,
+          })),
+        } as OyunDurumu;
+      },
       // Zamanlayici ve gecici durumlar kaydedilmez
       partialize: (d) => ({
         ayarlar: d.ayarlar,

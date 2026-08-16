@@ -14,7 +14,7 @@ import { BagButonu, Buton, CikisButonu } from '../../src/arayuz/Buton';
 import { CikisOnayi } from '../../src/arayuz/CikisOnayi';
 import { Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
-import { anlatanAdiSec, aktifTakimSec, oyunDeposu } from '../../src/oyun/durum';
+import { anlaticiSirasiSec, anlatanAdiSec, aktifTakimSec, oyunDeposu } from '../../src/oyun/durum';
 import { sesCal } from '../../src/oyun/sesler';
 import { BOSLUK, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
@@ -30,6 +30,7 @@ export default function SiraEkrani() {
   const sesAcik = oyunDeposu((d) => d.ayarlar.sesAcik);
   const titresimAcik = oyunDeposu((d) => d.ayarlar.titresimAcik);
   const turBaslat = oyunDeposu((d) => d.turBaslat);
+  const anlaticiSira = oyunDeposu(anlaticiSirasiSec);
 
   const [geriSayim, setGeriSayim] = useState<number | null>(null);
   const [cikisSoruluyor, setCikisSoruluyor] = useState(false);
@@ -104,6 +105,12 @@ export default function SiraEkrani() {
           </View>
 
           <Yazi tur="baslik" boyut={BOYUT.devasa} ortala>{anlatan}</Yazi>
+
+          {isimlerAcik && anlaticiSira.toplam > 1 ? (
+            <Yazi tur="cokKalin" boyut={BOYUT.kucuk} renk={RENK.sis} harfAraligi={1.4}>
+              {`TAKIMDA ${anlaticiSira.sira} / ${anlaticiSira.toplam}`}
+            </Yazi>
+          ) : null}
 
           <Yazi boyut={BOYUT.notr} renk={RENK.sis} ortala style={durum.aciklama}>
             Telefonu sen tut, rakipten biri omzundan baksın.
