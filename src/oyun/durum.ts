@@ -21,7 +21,7 @@ import {
   yenidenKaristir,
   type DesteDurumu,
 } from './deste';
-import { desteyiYukle } from './kategoriler';
+import { desteyiYukle, zorlukIndeksleri } from './kategoriler';
 import {
   BOS_TUR,
   aksiyonPuani,
@@ -44,6 +44,7 @@ import {
   VARSAYILAN_AYARLAR,
   type AksiyonTuru,
   type Ayarlar,
+  type HamKart,
   type Kart,
   type Takim,
   type TurSayaclari,
@@ -58,6 +59,15 @@ export type OyunOlayi =
   | { tur: 'turBitti' }
   | { tur: 'sonSaniyeler' };
 
+/** Geri almak icin saklanan anlik goruntu. */
+export type GeriAdim = {
+  readonly deste: DesteDurumu;
+  readonly aktifKart: Kart | null;
+  readonly turSayaclari: TurSayaclari;
+  readonly takimPuani: number;
+  readonly takimSira: number;
+};
+
 export type OyunDurumu = {
   ayarlar: Ayarlar;
   takimlar: Takim[];
@@ -71,6 +81,15 @@ export type OyunDurumu = {
   /** Seri bitti sorusu ekranda mi. */
   seriBittiSoruluyor: boolean;
   cikisSoruluyor: boolean;
+  /** Kullanicinin kendi yazdigi kartlar. Diske yazilir. */
+  kendiKartlar: HamKart[];
+  /** Bozuk oldugu bildirilen kartlar. Diske yazilir. */
+  bildirilenler: HamKart[];
+  /**
+   * Son aksiyondan onceki durum. Yanlis basmayi duzeltmek icin tutulur.
+   * Tek adim geri alinir - amac hatayi duzeltmek, gecmisi gezmek degil.
+   */
+  geriAlinacak: GeriAdim | null;
   /** Son olay - ekranlar buna bakip ses calar ve animasyon tetikler. */
   sonOlay: OyunOlayi | null;
 
@@ -85,6 +104,10 @@ export type OyunDurumu = {
   aksiyonIsle: (tur: AksiyonTuru) => void;
   saniyeIlerlet: () => void;
   turuBitir: () => void;
+  geriAl: () => void;
+  kendiKartEkle: (kart: HamKart) => void;
+  kendiKartSil: (sira: number) => void;
+  kartBildir: (kart: Kart) => void;
   cikisiSor: () => void;
   cikisiKapat: () => void;
   siradakiTakimaGec: () => void;
@@ -119,6 +142,9 @@ export const oyunDeposu = create<OyunDurumu>()(
       kilitli: false,
       seriBittiSoruluyor: false,
       cikisSoruluyor: false,
+      kendiKartlar: [],
+      bildirilenler: [],
+      geriAlinacak: null,
       sonOlay: null,
 
       // ---- Kurulum ----
@@ -163,11 +189,13 @@ export const oyunDeposu = create<OyunDurumu>()(
       // ---- Seri ----
 
       kategoriSec: (kimlik) => {
-        const deste = desteyiYukle(kimlik);
+        const durum = oku();
+        const deste = desteyiYukle(kimlik, durum.kendiKartlar);
         ayarla({
-          deste: desteKur(kimlik, deste.length),
+          deste: desteKur(kimlik, zorlukIndeksleri(deste, durum.ayarlar.zorlukModu)),
           aktifKart: null,
           seriBittiSoruluyor: false,
+          geriAlinacak: null,
           sonOlay: null,
         });
       },
@@ -180,6 +208,7 @@ export const oyunDeposu = create<OyunDurumu>()(
           kilitli: false,
           seriBittiSoruluyor: false,
           cikisSoruluyor: false,
+          geriAlinacak: null,
           sonOlay: null,
         });
         kartiIlerlet(ayarla, oku);
@@ -214,7 +243,16 @@ export const oyunDeposu = create<OyunDurumu>()(
         // Pas gecilen kart seri sonunda bir kez daha gelecek
         const deste = tur === 'pas' ? pasKaydet(durum.deste) : durum.deste;
 
-        ayarla({ turSayaclari: sayaclar, takimlar, deste });
+        // Yanlis basma duzeltilebilsin diye onceki durum saklanir
+        const geriAlinacak: GeriAdim = {
+          deste: durum.deste,
+          aktifKart: durum.aktifKart,
+          turSayaclari: durum.turSayaclari,
+          takimPuani: durum.takimlar[durum.siradakiTakim]?.puan ?? 0,
+          takimSira: durum.siradakiTakim,
+        };
+
+        ayarla({ turSayaclari: sayaclar, takimlar, deste, geriAlinacak });
 
         // Son kart modunda tek aksiyon hakki var, tur biter
         if (durum.sayac.sonKartModuAktif) {
@@ -248,6 +286,60 @@ export const oyunDeposu = create<OyunDurumu>()(
           ayarla({ sonOlay: { tur: 'sonSaniyeler' } });
         }
       },
+
+      /**
+       * Son aksiyonu geri alir.
+       *
+       * Heyecanla yanlis dugmeye basmak bu oyunun en sik sikayeti.
+       * Puan, sayaclar, deste imleci ve pas listesi birlikte geri sarilir -
+       * ucu ayri ayri duzeltilirse deste tutarsiz kalirdi.
+       *
+       * Tek adim tutulur. Amac hatayi duzeltmek, gecmisi gezmek degil.
+       */
+      geriAl: () => {
+        const durum = oku();
+        const adim = durum.geriAlinacak;
+        if (!adim || durum.seriBittiSoruluyor || durum.cikisSoruluyor) return;
+
+        ayarla({
+          deste: adim.deste,
+          aktifKart: adim.aktifKart,
+          turSayaclari: adim.turSayaclari,
+          takimlar: durum.takimlar.map((t, i) =>
+            i === adim.takimSira ? { ...t, puan: adim.takimPuani } : t,
+          ),
+          geriAlinacak: null,
+          kilitli: false,
+          sonOlay: { tur: 'kartDegisti' },
+        });
+      },
+
+      // ---- Kendi kelimeleri ----
+
+      kendiKartEkle: (kart) =>
+        ayarla((d) => ({ kendiKartlar: [...d.kendiKartlar, kart] })),
+
+      kendiKartSil: (sira) =>
+        ayarla((d) => ({ kendiKartlar: d.kendiKartlar.filter((_, i) => i !== sira) })),
+
+      /**
+       * Bozuk kart bildirimi. Kart listeye eklenir, kullanici daha sonra
+       * ayarlardan gorup CSV'de duzeltebilir. Ayni kart iki kez eklenmez.
+       */
+      kartBildir: (kart) =>
+        ayarla((d) => {
+          if (d.bildirilenler.some((b) => b[0] === kart.kelime)) return {};
+          const ham: HamKart = [
+            kart.kelime,
+            kart.yasaklilar[0] ?? '',
+            kart.yasaklilar[1] ?? '',
+            kart.yasaklilar[2] ?? '',
+            kart.yasaklilar[3] ?? '',
+            kart.yasaklilar[4] ?? '',
+            kart.zorluk,
+          ];
+          return { bildirilenler: [...d.bildirilenler, ham] };
+        }),
 
       turuBitir: () => {
         const durum = oku();
@@ -287,9 +379,12 @@ export const oyunDeposu = create<OyunDurumu>()(
       yenidenKar: () => {
         const durum = oku();
         if (!durum.deste) return;
-        const deste = desteyiYukle(durum.deste.kategoriKimlik);
+        const deste = desteyiYukle(durum.deste.kategoriKimlik, durum.kendiKartlar);
         ayarla({
-          deste: yenidenKaristir(durum.deste, deste.length),
+          deste: yenidenKaristir(
+            durum.deste,
+            zorlukIndeksleri(deste, durum.ayarlar.zorlukModu),
+          ),
           seriBittiSoruluyor: false,
           sayac: devamEt(durum.sayac),
         });
@@ -310,6 +405,7 @@ export const oyunDeposu = create<OyunDurumu>()(
           sonOlay: null,
           seriBittiSoruluyor: false,
           cikisSoruluyor: false,
+          geriAlinacak: null,
         })),
 
       yeniOyun: () => {
@@ -325,6 +421,8 @@ export const oyunDeposu = create<OyunDurumu>()(
         takimlar: d.takimlar,
         siradakiTakim: d.siradakiTakim,
         deste: d.deste,
+        kendiKartlar: d.kendiKartlar,
+        bildirilenler: d.bildirilenler,
       }),
     },
   ),
@@ -344,7 +442,7 @@ function kartiIlerlet(
   const durum = oku();
   if (!durum.deste) return;
 
-  const kartlar = desteyiYukle(durum.deste.kategoriKimlik);
+  const kartlar = desteyiYukle(durum.deste.kategoriKimlik, durum.kendiKartlar);
   const sonuc = kartCek(durum.deste);
 
   if (sonuc.tur === 'seriBitti') {
@@ -400,4 +498,35 @@ export function anlatanAdiSec(durum: OyunDurumu): string {
   if (!durum.ayarlar.isimlerAcik) return takim.ad;
   const oyuncu = takim.oyuncular[takim.anlatanSira % takim.oyuncular.length];
   return oyuncu?.trim() || takim.ad;
+}
+
+/**
+ * Yarim kalmis bir oyun var mi.
+ *
+ * Deste diske yaziliyor, yani uygulama kapansa bile seri duruyor.
+ * Ana ekran buna bakip "Devam Et" gosterir - veri zaten vardi ama
+ * kullaniciya acilan bir kapi yoktu.
+ */
+export function yarimOyunVarMiSec(durum: OyunDurumu): boolean {
+  return durum.deste !== null && !oyunBittiMi(durum.takimlar, durum.ayarlar);
+}
+
+/** Geri alinacak bir aksiyon var mi. */
+export function geriAlinabilirMiSec(durum: OyunDurumu): boolean {
+  return (
+    durum.geriAlinacak !== null &&
+    !durum.seriBittiSoruluyor &&
+    !durum.cikisSoruluyor &&
+    durum.sayac.calisiyorMu
+  );
+}
+
+/** Takimin oyuncu listesinde siradaki anlaticinin sirasi (1 tabanli). */
+export function anlaticiSirasiSec(durum: OyunDurumu): { sira: number; toplam: number } {
+  const takim = aktifTakimSec(durum);
+  if (!takim || takim.oyuncular.length === 0) return { sira: 0, toplam: 0 };
+  return {
+    sira: (takim.anlatanSira % takim.oyuncular.length) + 1,
+    toplam: takim.oyuncular.length,
+  };
 }

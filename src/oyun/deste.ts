@@ -64,16 +64,30 @@ export function diziKaristir(
   return sira;
 }
 
+/**
+ * Deste kaynagi.
+ *
+ * Sayi verilirse 0'dan o sayiya kadar tum indeksler kullanilir.
+ * Dizi verilirse yalnizca o indeksler girer - zorluk suzgeci boyle
+ * calisir, destenin bir alt kumesiyle seri kurulabilir.
+ */
+export type DesteKaynagi = number | readonly number[];
+
+function indeksleriCoz(kaynak: DesteKaynagi): number[] {
+  return typeof kaynak === 'number'
+    ? Array.from({ length: kaynak }, (_, i) => i)
+    : [...kaynak];
+}
+
 /** Yeni bir seri baslatir. */
 export function desteKur(
   kategoriKimlik: string,
-  kartSayisi: number,
+  kaynak: DesteKaynagi,
   rastgele: Rastgele = Math.random,
 ): DesteDurumu {
-  const tumIndeksler = Array.from({ length: kartSayisi }, (_, i) => i);
   return {
     kategoriKimlik,
-    sira: diziKaristir(tumIndeksler, null, rastgele),
+    sira: diziKaristir(indeksleriCoz(kaynak), null, rastgele),
     imlec: 0,
     pasListesi: [],
     pasTuruAktif: false,
@@ -140,13 +154,12 @@ export function pasKaydet(durum: DesteDurumu): DesteDurumu {
 /** Seri bitti, ayni kategoride bastan. Puanlar cagiran tarafta korunur. */
 export function yenidenKaristir(
   durum: DesteDurumu,
-  kartSayisi: number,
+  kaynak: DesteKaynagi,
   rastgele: Rastgele = Math.random,
 ): DesteDurumu {
-  const tumIndeksler = Array.from({ length: kartSayisi }, (_, i) => i);
   return {
     kategoriKimlik: durum.kategoriKimlik,
-    sira: diziKaristir(tumIndeksler, durum.sonGosterilen, rastgele),
+    sira: diziKaristir(indeksleriCoz(kaynak), durum.sonGosterilen, rastgele),
     imlec: 0,
     pasListesi: [],
     pasTuruAktif: false,

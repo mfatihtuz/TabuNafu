@@ -54,6 +54,28 @@ export type Takim = {
 
 export type BitisModu = 'puan' | 'tur' | 'sinirsiz';
 
+/**
+ * Deste zorluk suzgeci.
+ *
+ * Her kartin 1-5 arasi zorlugu var ve dagilim %10/%35/%35/%15/%5.
+ * Cocuk modu en kolay iki seviyeyi alir (destenin ~%45'i), zor mod
+ * ustteki uc seviyeyi (~%55). Ikisi de tek basina seri kuracak kadar
+ * kart birakiyor.
+ */
+export type ZorlukModu = 'cocuk' | 'karisik' | 'zor';
+
+export const ZORLUK_ARALIKLARI: Record<ZorlukModu, readonly number[]> = {
+  cocuk: [1, 2],
+  karisik: [1, 2, 3, 4, 5],
+  zor: [3, 4, 5],
+};
+
+export const ZORLUK_ETIKETLERI: Record<ZorlukModu, string> = {
+  cocuk: 'Çocuk',
+  karisik: 'Karışık',
+  zor: 'Zor',
+};
+
 export type Ayarlar = {
   sure: number;
   pasHakki: number;
@@ -65,6 +87,9 @@ export type Ayarlar = {
   sesAcik: boolean;
   titresimAcik: boolean;
   isimlerAcik: boolean;
+  zorlukModu: ZorlukModu;
+  /** Aksiyon butonlarini ters cevirir - sol elle tutanlar icin. */
+  solElModu: boolean;
 };
 
 export const VARSAYILAN_AYARLAR: Ayarlar = {
@@ -78,6 +103,8 @@ export const VARSAYILAN_AYARLAR: Ayarlar = {
   sesAcik: true,
   titresimAcik: true,
   isimlerAcik: false,
+  zorlukModu: 'karisik',
+  solElModu: false,
 };
 
 /** Ayar ekranlarindaki secenek listeleri. */

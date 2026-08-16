@@ -12,7 +12,7 @@
  * birlestirilir.
  */
 
-import type { HamKart, Kategori } from './tipler';
+import { ZORLUK_ARALIKLARI, type HamKart, type Kategori, type ZorlukModu } from './tipler';
 
 /**
  * Renkler renk carkina yayildi. Gri ton yok, ucten fazla ayni ailede
@@ -42,6 +42,21 @@ export const KATEGORILER: readonly Kategori[] = [
 ];
 
 export const KARISIK_KIMLIK = 'karisik';
+export const KENDI_KIMLIK = 'kendi';
+
+/**
+ * Kullanicinin kendi yazdigi kelimeler.
+ *
+ * Dosyasi yoktur - kartlar store'da tutulur ve diske yazilir. Bu yuzden
+ * desteyiYukle disaridan kendiKartlar almak zorunda.
+ */
+export const KENDI: Kategori = {
+  kimlik: KENDI_KIMLIK,
+  ad: 'Kelimelerim',
+  ikon: 'feather',
+  renk: '#9B7EDE',
+  hedefKart: 0,
+};
 
 export const KARISIK: Kategori = {
   kimlik: KARISIK_KIMLIK,
@@ -81,23 +96,63 @@ const DESTELER: Record<string, () => HamKart[]> = {
 /** Bir kez birlestirilen KARISIK destesi burada saklanir. */
 let karisikOnbellek: HamKart[] | null = null;
 
-export function desteyiYukle(kategoriKimlik: string): HamKart[] {
+export function desteyiYukle(
+  kategoriKimlik: string,
+  kendiKartlar: readonly HamKart[] = [],
+): HamKart[] {
+  if (kategoriKimlik === KENDI_KIMLIK) return [...kendiKartlar];
+
   if (kategoriKimlik === KARISIK_KIMLIK) {
     if (!karisikOnbellek) {
       karisikOnbellek = Object.values(DESTELER).flatMap((yukle) => yukle());
     }
-    return karisikOnbellek;
+    // Kendi kelimeleri de karisiga girer - onbellege yazilmaz cunku
+    // kullanici yeni kart ekleyince degisir
+    return kendiKartlar.length > 0 ? [...karisikOnbellek, ...kendiKartlar] : karisikOnbellek;
   }
+
   const yukle = DESTELER[kategoriKimlik];
   return yukle ? yukle() : [];
 }
 
+/**
+ * Zorluk suzgecinden gecen kart indekslerini dondurur.
+ *
+ * Suzgec desteyi asiri kucultursa (kullanicinin kendi kartlari hep ayni
+ * zorluktaysa olabilir) tum deste dondurulur - oyuncuyu bos desteyle
+ * bas basa birakmaktansa suzgeci yok saymak iyidir.
+ */
+export const EN_AZ_KART = 12;
+
+export function zorlukIndeksleri(
+  deste: readonly HamKart[],
+  mod: ZorlukModu,
+): number[] {
+  if (mod === 'karisik') return deste.map((_, i) => i);
+
+  const izinli = ZORLUK_ARALIKLARI[mod];
+  const secilen: number[] = [];
+  for (let i = 0; i < deste.length; i++) {
+    if (izinli.includes(deste[i]![6])) secilen.push(i);
+  }
+  return secilen.length >= EN_AZ_KART ? secilen : deste.map((_, i) => i);
+}
+
 export function kategoriBul(kimlik: string): Kategori {
   if (kimlik === KARISIK_KIMLIK) return KARISIK;
+  if (kimlik === KENDI_KIMLIK) return KENDI;
   return KATEGORILER.find((k) => k.kimlik === kimlik) ?? KARISIK;
 }
 
-/** Kategori ekraninda kart sayilarini gostermek icin. */
-export function kartSayisi(kategoriKimlik: string): number {
-  return desteyiYukle(kategoriKimlik).length;
+/**
+ * Kategori ekraninda gosterilecek kart sayisi.
+ * Zorluk suzgeci acikken suzgecten gecen sayiyi verir - kutucuktaki
+ * rakam gercekten oynanacak deste kadar olsun.
+ */
+export function kartSayisi(
+  kategoriKimlik: string,
+  mod: ZorlukModu = 'karisik',
+  kendiKartlar: readonly HamKart[] = [],
+): number {
+  return zorlukIndeksleri(desteyiYukle(kategoriKimlik, kendiKartlar), mod).length;
 }

@@ -9,7 +9,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Buton } from '../src/arayuz/Buton';
 import { Yazi } from '../src/arayuz/Yazi';
 import { Zemin } from '../src/arayuz/Zemin';
-import { oyunDeposu } from '../src/oyun/durum';
+import { kategoriBul } from '../src/oyun/kategoriler';
+import { oyunDeposu, yarimOyunVarMiSec } from '../src/oyun/durum';
 import { SURUM, YAPIM } from '../src/surum';
 import { BOSLUK, KART_GOLGE, YARICAP } from '../src/tema/golgeler';
 import { RENK } from '../src/tema/renkler';
@@ -20,6 +21,13 @@ export default function AnaEkran() {
   const kenar = useSafeAreaInsets();
   const yeniOyun = oyunDeposu((d) => d.yeniOyun);
   const titresimAcik = oyunDeposu((d) => d.ayarlar.titresimAcik);
+  const yarimOyun = oyunDeposu(yarimOyunVarMiSec);
+  const deste = oyunDeposu((d) => d.deste);
+  const takimlar = oyunDeposu((d) => d.takimlar);
+
+  // Yarim oyun kaldiysa oncelik onda - kullanici ilk onu gormeli
+  const surenKategori = deste ? kategoriBul(deste.kategoriKimlik).ad : '';
+  const enYuksekPuan = Math.max(0, ...takimlar.map((t) => t.puan));
 
   return (
     <Zemin>
@@ -52,8 +60,24 @@ export default function AnaEkran() {
         </View>
 
         <View style={durum.menu}>
+          {yarimOyun ? (
+            <Buton
+              metin="Devam Et"
+              ikon="play"
+              titresimAcik={titresimAcik}
+              onPress={() => yonlendir.push('/oyun/sira')}
+            />
+          ) : null}
+
+          {yarimOyun ? (
+            <Yazi boyut={BOYUT.kucuk} renk={RENK.sis} ortala style={durum.yarimBilgi}>
+              {`${surenKategori} · en yüksek ${enYuksekPuan} puan`}
+            </Yazi>
+          ) : null}
+
           <Buton
-            metin="Yeni Oyun"
+            metin={yarimOyun ? 'Yeni Oyun Kur' : 'Yeni Oyun'}
+            ikincil={yarimOyun}
             ikon="play"
             titresimAcik={titresimAcik}
             onPress={() => {
@@ -103,5 +127,6 @@ const durum = StyleSheet.create({
   logoAna: { top: 32, right: 26, height: 8, backgroundColor: RENK.metinAna },
   aciklama: { maxWidth: 290, marginTop: BOSLUK.orta },
   menu: { gap: BOSLUK.notr },
+  yarimBilgi: { marginTop: -BOSLUK.kucuk },
   damga: { marginTop: BOSLUK.orta, opacity: 0.45 },
 });
