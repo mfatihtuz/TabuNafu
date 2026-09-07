@@ -17,6 +17,9 @@
  *  10  Zorluk dagilimi hedefe yakin (%10/%35/%35/%15/%5)
  *  11  Uretilen JSON kaynak CSV ile senkron
  *  12  Kategori basina asgari kart (--kesin bayragiyla)
+ *  13  Tek hamlede cozulen tuzak yok: ana kelimenin zit/es anlamlisi
+ *      yasakli listede olmali. Yoksa anlatan "sicak degil" deyip
+ *      isi bitiriyor ve bes yasakli kelime hicbir ise yaramiyor.
  *
  * Kullanim
  *   node scripts/validate-words.mjs           uyari modu, eksik kart hata degil
@@ -28,6 +31,7 @@ import { fileURLToPath } from 'node:url';
 import { basename, dirname, join } from 'node:path';
 
 import { csvAyristir } from './build-words.mjs';
+import { ES_ANLAMLILAR, MUAFLAR, ZIT_ESLER } from '../icerik/kolay-ipucu.mjs';
 
 const KOK = join(dirname(fileURLToPath(import.meta.url)), '..');
 const KAYNAK_KLASOR = join(KOK, 'icerik', 'kelimeler');
@@ -64,6 +68,30 @@ function govdeCakisiyorMu(ana, yasakli) {
   if (a.length < 4 || y.length < 4) return false;
   const kok = Math.max(4, Math.floor(Math.min(a.length, y.length) * 0.75));
   return a.slice(0, kok) === y.slice(0, kok);
+}
+
+/**
+ * Ana kelime -> zorunlu yasakli esleri. Liste iki yonlu okunur.
+ */
+const esHaritasi = new Map();
+for (const [a, b] of [...ZIT_ESLER, ...ES_ANLAMLILAR]) {
+  for (const [x, y] of [[a, b], [b, a]]) {
+    if (!esHaritasi.has(x)) esHaritasi.set(x, []);
+    esHaritasi.get(x).push(y);
+  }
+}
+
+const muafKume = new Set(MUAFLAR.map((m) => `${m.kategori}|${m.kelime}|${m.es}`));
+
+/** Yasakli kelime esi engelliyor mu - tam sozcuk ya da ayni govde. */
+function esiEngelliyorMu(yasakli, es) {
+  if (yasakli === es) return true;
+  if (yasakli.split(' ').includes(es)) return true;
+  const y = yasakli.replace(/\s/g, '');
+  const e = es.replace(/\s/g, '');
+  if (y.length < 4 || e.length < 4) return false;
+  const kok = Math.max(4, Math.floor(Math.min(y.length, e.length) * 0.75));
+  return y.slice(0, kok) === e.slice(0, kok);
 }
 
 const hatalar = [];
@@ -112,6 +140,16 @@ for (const dosya of dosyalar) {
       hatalar.push(`${yer} "${ana}": ${globalAna.get(ana)} icinde de var`);
     } else {
       globalAna.set(ana, kategori);
+    }
+
+    // 13  Tek hamlede cozulen tuzak
+    for (const es of esHaritasi.get(ana) ?? []) {
+      if (muafKume.has(`${kategori}|${ana}|${es}`)) continue;
+      if (!dolu.some((y) => esiEngelliyorMu(y, es))) {
+        hatalar.push(
+          `${yer} "${ana}": "${es}" yasaklanmamis, tek hamlede cozulur`,
+        );
+      }
     }
 
     // 5  Kart ici tekrar
