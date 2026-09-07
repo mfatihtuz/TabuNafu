@@ -23,7 +23,7 @@ import {
   turCesidiSec,
 } from '../../src/oyun/durum';
 import { Ikon } from '../../src/cizimler/Ikon';
-import { TUR_CESIDI_BILGI, takimSuresi } from '../../src/oyun/tipler';
+import { TUR_CESIDI_BILGI, handikapFarki } from '../../src/oyun/tipler';
 import { sesCal } from '../../src/oyun/sesler';
 import { BOSLUK, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
@@ -48,7 +48,7 @@ export default function SiraEkrani() {
   const isinma = ayarlar.isinmaTuru && oynananTur === 0;
   const cesit = isinma ? null : turCesidiSec(ayarlar, oynananTur);
   const cesitBilgi = cesit ? TUR_CESIDI_BILGI[cesit] : null;
-  const sure = takimSuresi(ayarlar.sure, takim?.handikap ?? false);
+  const ekSure = handikapFarki(ayarlar.sure);
 
   const [geriSayim, setGeriSayim] = useState<number | null>(null);
   const [cikisSoruluyor, setCikisSoruluyor] = useState(false);
@@ -155,7 +155,7 @@ export default function SiraEkrani() {
 
           {takim?.handikap ? (
             <Yazi tur="cokKalin" boyut={BOYUT.kucuk} renk={RENK.dogru}>
-              {`EK SÜRE · ${sure} SANİYE`}
+              {`+${ekSure} SANİYE EK SÜRE`}
             </Yazi>
           ) : null}
 

@@ -31,6 +31,7 @@ import Animated, {
 import { KART_GOLGE, YARICAP } from '../tema/golgeler';
 import { RENK } from '../tema/renkler';
 import { BOYUT } from '../tema/yazitipi';
+import { AltinHalka, AltinParilti } from './AltinParilti';
 import { Yazi } from './Yazi';
 
 type Ozellikler = {
@@ -94,7 +95,6 @@ export function Kart3D({
         durum.kart,
         KART_GOLGE,
         sonKartMi && durum.kartSonKart,
-        altinMi && durum.kartAltin,
         govdeStil,
       ]}
     >
@@ -105,6 +105,8 @@ export function Kart3D({
           altinMi && !sonKartMi && { backgroundColor: RENK.pirinc },
         ]}
       />
+
+      {altinMi ? <AltinParilti /> : null}
 
       {altinMi ? (
         <View style={[durum.rozet, durum.rozetAltin]}>
@@ -167,6 +169,8 @@ export function Kart3D({
         </View>
       </View>
 
+      {altinMi ? <AltinHalka /> : null}
+
       {/*
         Uzun basma katmani EN USTTE olmali - alta konursa ustundeki
         metin gorunumleri dokunusu yakalar. Normal dokunus bir sey yapmaz,
@@ -198,10 +202,6 @@ const durum = StyleSheet.create({
   kartSonKart: {
     borderWidth: 4,
     borderColor: RENK.yanlis,
-  },
-  kartAltin: {
-    borderWidth: 4,
-    borderColor: RENK.pirinc,
   },
   bant: {
     height: 13,

@@ -181,6 +181,18 @@ export function takimSuresi(sure: number, handikap: boolean): number {
   return handikap ? Math.round(sure * HANDIKAP_CARPANI) : sure;
 }
 
+/**
+ * Handikabin getirdigi EK saniye.
+ *
+ * Ekranda toplam sure degil fark yazilir - "90 saniye" degil
+ * "+30 saniye ek sure". Kullanici ne kazandigini boyle aninda goruyor,
+ * ustelik ayarlanan sure degistikce fark da kendiliginden degisiyor:
+ * 60 -> +30, 120 -> +60.
+ */
+export function handikapFarki(sure: number): number {
+  return takimSuresi(sure, true) - sure;
+}
+
 /** Altin kart destenin yuzde kaci. */
 export const ALTIN_ORANI = 0.02;
 

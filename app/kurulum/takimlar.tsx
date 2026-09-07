@@ -16,7 +16,7 @@ import { Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
 import { Ikon } from '../../src/cizimler/Ikon';
 import { oyunDeposu } from '../../src/oyun/durum';
-import { takimSuresi } from '../../src/oyun/tipler';
+import { handikapFarki } from '../../src/oyun/tipler';
 import { BOSLUK, PANEL, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
 import { BOYUT } from '../../src/tema/yazitipi';
@@ -139,7 +139,7 @@ export default function TakimKurulumu() {
                     renk={takim.handikap ? RENK.fildisi : RENK.sis}
                   >
                     {takim.handikap
-                      ? `Ek süre açık · ${takimSuresi(sure, true)} saniye`
+                      ? `+${handikapFarki(sure)} saniye ek süre`
                       : 'Ek süre'}
                   </Yazi>
                 </Pressable>
