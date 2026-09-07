@@ -7,14 +7,16 @@
  */
 
 import { useRouter } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Buton, GeriButonu } from '../../src/arayuz/Buton';
 import { SayiSecici, Toggle } from '../../src/arayuz/Toggle';
 import { Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
+import { Ikon } from '../../src/cizimler/Ikon';
 import { oyunDeposu } from '../../src/oyun/durum';
+import { takimSuresi } from '../../src/oyun/tipler';
 import { BOSLUK, PANEL, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
 import { BOYUT } from '../../src/tema/yazitipi';
@@ -26,6 +28,7 @@ export default function TakimKurulumu() {
   const takimlar = oyunDeposu((d) => d.takimlar);
   const isimlerAcik = oyunDeposu((d) => d.ayarlar.isimlerAcik);
   const titresimAcik = oyunDeposu((d) => d.ayarlar.titresimAcik);
+  const sure = oyunDeposu((d) => d.ayarlar.sure);
   const takimSayisiniAyarla = oyunDeposu((d) => d.takimSayisiniAyarla);
   const takimGuncelle = oyunDeposu((d) => d.takimGuncelle);
   const oyuncuSayisiniAyarla = oyunDeposu((d) => d.oyuncuSayisiniAyarla);
@@ -112,6 +115,34 @@ export default function TakimKurulumu() {
                     ))}
                   </View>
                 ) : null}
+
+                {/*
+                  Handikap. Ek saniye vermek yerine sureyi 1.5 katina
+                  cikarir - ayarlanan sure ne olursa olsun oran ayni kalir.
+                */}
+                <Pressable
+                  onPress={() => takimGuncelle(sira, { handikap: !takim.handikap })}
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: takim.handikap }}
+                  accessibilityLabel={`${takim.ad} için ek süre`}
+                  style={[durum.handikap, takim.handikap && durum.handikapAcik]}
+                >
+                  <Ikon
+                    ad={takim.handikap ? 'check' : 'timer'}
+                    boyut={15}
+                    renk={takim.handikap ? RENK.dogru : RENK.sis}
+                    cizgiKalinligi={2.6}
+                  />
+                  <Yazi
+                    tur="cokKalin"
+                    boyut={BOYUT.kucuk}
+                    renk={takim.handikap ? RENK.fildisi : RENK.sis}
+                  >
+                    {takim.handikap
+                      ? `Ek süre açık · ${takimSuresi(sure, true)} saniye`
+                      : 'Ek süre'}
+                  </Yazi>
+                </Pressable>
               </View>
             ))}
           </ScrollView>
@@ -155,6 +186,18 @@ const durum = StyleSheet.create({
     fontSize: BOYUT.govde,
   },
   girdiKucuk: { minHeight: 42, fontSize: BOYUT.notr },
+  handikap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    alignSelf: 'flex-start',
+    minHeight: 44,
+    paddingHorizontal: 11,
+    borderRadius: YARICAP.kucuk,
+    borderWidth: 1.5,
+    borderColor: RENK.cizgi,
+  },
+  handikapAcik: { borderColor: RENK.dogru, backgroundColor: 'rgba(18,161,80,0.12)' },
   oyuncuListe: { gap: 7, paddingLeft: 45 },
   oyuncuSatir: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   oyuncuNo: { width: 16 },

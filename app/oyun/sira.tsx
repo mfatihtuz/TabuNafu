@@ -14,7 +14,16 @@ import { BagButonu, Buton, CikisButonu } from '../../src/arayuz/Buton';
 import { CikisOnayi } from '../../src/arayuz/CikisOnayi';
 import { Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
-import { anlaticiSirasiSec, anlatanAdiSec, aktifTakimSec, oyunDeposu } from '../../src/oyun/durum';
+import {
+  anlaticiSirasiSec,
+  anlatanAdiSec,
+  aktifTakimSec,
+  oyunDeposu,
+  sonDuzlukteMiSec,
+  turCesidiSec,
+} from '../../src/oyun/durum';
+import { Ikon } from '../../src/cizimler/Ikon';
+import { TUR_CESIDI_BILGI, takimSuresi } from '../../src/oyun/tipler';
 import { sesCal } from '../../src/oyun/sesler';
 import { BOSLUK, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
@@ -31,6 +40,15 @@ export default function SiraEkrani() {
   const titresimAcik = oyunDeposu((d) => d.ayarlar.titresimAcik);
   const turBaslat = oyunDeposu((d) => d.turBaslat);
   const anlaticiSira = oyunDeposu(anlaticiSirasiSec);
+  const sonDuzluk = oyunDeposu(sonDuzlukteMiSec);
+  const ayarlar = oyunDeposu((d) => d.ayarlar);
+  const oynananTur = oyunDeposu((d) => d.oynananTur);
+
+  // Isinma turunda ozel cesit gelmez - once kural ogrenilsin
+  const isinma = ayarlar.isinmaTuru && oynananTur === 0;
+  const cesit = isinma ? null : turCesidiSec(ayarlar, oynananTur);
+  const cesitBilgi = cesit ? TUR_CESIDI_BILGI[cesit] : null;
+  const sure = takimSuresi(ayarlar.sure, takim?.handikap ?? false);
 
   const [geriSayim, setGeriSayim] = useState<number | null>(null);
   const [cikisSoruluyor, setCikisSoruluyor] = useState(false);
@@ -112,9 +130,42 @@ export default function SiraEkrani() {
             </Yazi>
           ) : null}
 
+          {isinma ? (
+            <View style={[durum.bant, durum.bantIsinma]}>
+              <Yazi tur="cokKalin" boyut={BOYUT.kucuk} renk={RENK.sis} harfAraligi={1.4}>
+                ISINMA TURU · PUAN SAYILMAZ
+              </Yazi>
+            </View>
+          ) : null}
+
+          {cesitBilgi ? (
+            <View style={[durum.bant, durum.bantCesit]}>
+              <Ikon ad={cesitBilgi.ikon} boyut={16} renk={RENK.pirinc} cizgiKalinligi={2.4} />
+              <Yazi tur="cokKalin" boyut={BOYUT.notr} renk={RENK.pirinc}>
+                {cesitBilgi.ad}
+              </Yazi>
+            </View>
+          ) : null}
+
           <Yazi boyut={BOYUT.notr} renk={RENK.sis} ortala style={durum.aciklama}>
-            Telefonu sen tut, rakipten biri omzundan baksın.
+            {cesitBilgi
+              ? cesitBilgi.aciklama
+              : 'Telefonu sen tut, rakipten biri omzundan baksın.'}
           </Yazi>
+
+          {takim?.handikap ? (
+            <Yazi tur="cokKalin" boyut={BOYUT.kucuk} renk={RENK.dogru}>
+              {`EK SÜRE · ${sure} SANİYE`}
+            </Yazi>
+          ) : null}
+
+          {sonDuzluk ? (
+            <View style={[durum.bant, durum.bantDuzluk]}>
+              <Yazi tur="cokKalin" boyut={BOYUT.kucuk} renk={RENK.yanlis} harfAraligi={1.4}>
+                SON DÜZLÜK · HERKES EŞİT TUR OYNAYACAK
+              </Yazi>
+            </View>
+          ) : null}
         </Animated.View>
 
         <Buton metin="Başla" ikon="play" titresimAcik={titresimAcik} onPress={basla} />
@@ -138,5 +189,17 @@ const durum = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: YARICAP.tam,
   },
-  aciklama: { maxWidth: 260 },
+  aciklama: { maxWidth: 280 },
+  bant: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: YARICAP.tam,
+    borderWidth: 1.5,
+  },
+  bantIsinma: { borderColor: RENK.cizgi, backgroundColor: RENK.yuzey },
+  bantCesit: { borderColor: RENK.pirinc, backgroundColor: 'rgba(212,160,80,0.14)' },
+  bantDuzluk: { borderColor: RENK.yanlis, backgroundColor: 'rgba(224,30,55,0.14)' },
 });

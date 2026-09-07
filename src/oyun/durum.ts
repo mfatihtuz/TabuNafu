@@ -14,6 +14,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import {
+  altinMi,
   desteKur,
   kartCek,
   kartiGetir,
@@ -21,13 +22,15 @@ import {
   yenidenKaristir,
   type DesteDurumu,
 } from './deste';
-import { desteyiYukle, zorlukIndeksleri } from './kategoriler';
+import { altinAdaylari, desteyiYukle, zorlukIndeksleri } from './kategoriler';
 import {
   BOS_TUR,
   aksiyonPuani,
   dogruEkle,
+  altinPuani,
   oyunBittiMi,
   pasEkle,
+  sonDuzluktenMi,
   turPuani,
   yanlisEkle,
 } from './puanlama';
@@ -48,7 +51,10 @@ import {
   type HamKart,
   type Kart,
   type Takim,
+  type TurCesidi,
   type TurSayaclari,
+  takimSuresi,
+  TUR_CESITLERI,
 } from './tipler';
 
 /** Tur ekraninin cevap vermesi gereken olaylar. */
@@ -59,6 +65,22 @@ export type OyunOlayi =
   | { tur: 'sonKartBasladi' }
   | { tur: 'turBitti' }
   | { tur: 'sonSaniyeler' };
+
+/** Bitmis bir oyunun sonuc tablosu. Son bes tanesi saklanir. */
+export type OyunKaydi = {
+  readonly zaman: number;
+  readonly kategori: string;
+  readonly takimlar: readonly {
+    readonly ad: string;
+    readonly renk: string;
+    readonly puan: number;
+    readonly toplam: TurSayaclari;
+    readonly enIyiTur: number;
+  }[];
+};
+
+/** Kac oyun saklanir. Hatira icin yeter, depolamayi sismeye birakmaz. */
+export const GECMIS_SINIRI = 5;
 
 /** Geri almak icin saklanan anlik goruntu. */
 export type GeriAdim = {
@@ -91,6 +113,16 @@ export type OyunDurumu = {
    * Tek adim geri alinir - amac hatayi duzeltmek, gecmisi gezmek degil.
    */
   geriAlinacak: GeriAdim | null;
+  /** Bu turda gecerli olan ozel tur cesidi. Yoksa null. */
+  aktifTurCesidi: TurCesidi | null;
+  /** Bu tur puansiz isinma turu mu. */
+  isinmaAktif: boolean;
+  /** Oyun basindan beri oynanan toplam tur. Tur cesidi sirasi buna bakar. */
+  oynananTur: number;
+  /** Aktif kart altin mi. */
+  aktifKartAltin: boolean;
+  /** Son bes oyunun sonuc tablosu. Diske yazilir. */
+  gecmisOyunlar: OyunKaydi[];
   /** Son olay - ekranlar buna bakip ses calar ve animasyon tetikler. */
   sonOlay: OyunOlayi | null;
 
@@ -113,6 +145,7 @@ export type OyunDurumu = {
   cikisiSor: () => void;
   cikisiKapat: () => void;
   siradakiTakimaGec: () => void;
+  oyunuKaydet: () => void;
 
   yenidenKar: () => void;
   seriBittiKapat: () => void;
@@ -130,6 +163,7 @@ function takimOlustur(sira: number): Takim {
     anlatanSira: 0,
     toplam: BOS_TUR,
     enIyiTur: 0,
+    handikap: false,
   };
 }
 
@@ -149,6 +183,11 @@ export const oyunDeposu = create<OyunDurumu>()(
       kendiKartlar: [],
       bildirilenler: [],
       geriAlinacak: null,
+      aktifTurCesidi: null,
+      isinmaAktif: false,
+      oynananTur: 0,
+      aktifKartAltin: false,
+      gecmisOyunlar: [],
       sonOlay: null,
 
       // ---- Kurulum ----
@@ -196,7 +235,12 @@ export const oyunDeposu = create<OyunDurumu>()(
         const durum = oku();
         const deste = desteyiYukle(kimlik, durum.kendiKartlar);
         ayarla({
-          deste: desteKur(kimlik, zorlukIndeksleri(deste, durum.ayarlar.zorlukModu)),
+          deste: desteKur(
+            kimlik,
+            zorlukIndeksleri(deste, durum.ayarlar.zorlukModu),
+            Math.random,
+            durum.ayarlar.altinKart ? altinAdaylari(deste) : [],
+          ),
           aktifKart: null,
           seriBittiSoruluyor: false,
           geriAlinacak: null,
@@ -205,14 +249,30 @@ export const oyunDeposu = create<OyunDurumu>()(
       },
 
       turBaslat: () => {
-        const { ayarlar } = oku();
+        const durum = oku();
+        const { ayarlar } = durum;
+
+        // Isinma turu: oyunun ilk turu puansiz denemedir. Sira da
+        // ilerlemez, ayni takim hemen ardindan gercek turunu oynar.
+        const isinma = ayarlar.isinmaTuru && durum.oynananTur === 0;
+
+        const cesit = isinma ? null : turCesidiSec(ayarlar, durum.oynananTur);
+
+        // Handikap ek saniye degil carpan - ayarlanan sure ne olursa olsun
+        // oran ayni kalir
+        const takim = durum.takimlar[durum.siradakiTakim];
+        let sure = takimSuresi(ayarlar.sure, takim?.handikap ?? false);
+        if (cesit === 'hizli') sure = Math.max(15, Math.round(sure / 2));
+
         ayarla({
           turSayaclari: BOS_TUR,
-          sayac: baslat(sayacKur(ayarlar.sure)),
+          sayac: baslat(sayacKur(sure)),
           kilitli: false,
           seriBittiSoruluyor: false,
           cikisSoruluyor: false,
           geriAlinacak: null,
+          aktifTurCesidi: cesit,
+          isinmaAktif: isinma,
           sonOlay: null,
         });
         kartiIlerlet(ayarla, oku);
@@ -239,7 +299,12 @@ export const oyunDeposu = create<OyunDurumu>()(
           : tur === 'yanlis' ? yanlisEkle(durum.turSayaclari)
           : pasEkle(durum.turSayaclari);
 
-        const puan = aksiyonPuani(tur);
+        // Isinma turunda puan islenmez - deneme turudur
+        const puan = durum.isinmaAktif
+          ? 0
+          : durum.aktifKartAltin
+            ? altinPuani(tur)
+            : aksiyonPuani(tur);
         const takimlar = durum.takimlar.map((t, i) =>
           i === durum.siradakiTakim ? { ...t, puan: t.puan + puan } : t,
         );
@@ -350,9 +415,24 @@ export const oyunDeposu = create<OyunDurumu>()(
 
       turuBitir: () => {
         const durum = oku();
+
+        // Isinma turu sayilmaz: puan yok, istatistik yok, sira ilerlemez.
+        // Ayni takim hemen ardindan gercek turunu oynar.
+        if (durum.isinmaAktif) {
+          ayarla({
+            sayac: duraklat(durum.sayac),
+            isinmaAktif: false,
+            oynananTur: durum.oynananTur + 1,
+            geriAlinacak: null,
+            sonOlay: { tur: 'turBitti' },
+          });
+          return;
+        }
+
         const tur = durum.turSayaclari;
         const puan = turPuani(tur);
         ayarla({
+          oynananTur: durum.oynananTur + 1,
           sayac: duraklat(durum.sayac),
           takimlar: durum.takimlar.map((t, i) =>
             i === durum.siradakiTakim
@@ -390,6 +470,32 @@ export const oyunDeposu = create<OyunDurumu>()(
 
       cikisiKapat: () => ayarla({ cikisSoruluyor: false }),
 
+      /**
+       * Biten oyunu gecmise yazar. Son bes oyun saklanir.
+       *
+       * Amac hatira: sonuc tablosu yanlislikla gecilirse kaybolmasin,
+       * istenirse sonradan acilip fotograflansin. Uzun donem istatistik
+       * tutmuyoruz - depolamayi sismeye birakmadan isi goruyor.
+       */
+      oyunuKaydet: () => {
+        const durum = oku();
+        if (!durum.deste) return;
+        const kayit: OyunKaydi = {
+          zaman: Date.now(),
+          kategori: durum.deste.kategoriKimlik,
+          takimlar: durum.takimlar.map((t) => ({
+            ad: t.ad,
+            renk: t.renk,
+            puan: t.puan,
+            toplam: t.toplam,
+            enIyiTur: t.enIyiTur,
+          })),
+        };
+        ayarla({
+          gecmisOyunlar: [kayit, ...durum.gecmisOyunlar].slice(0, GECMIS_SINIRI),
+        });
+      },
+
       siradakiTakimaGec: () =>
         ayarla((d) => ({
           siradakiTakim: (d.siradakiTakim + 1) % d.takimlar.length,
@@ -406,6 +512,8 @@ export const oyunDeposu = create<OyunDurumu>()(
           deste: yenidenKaristir(
             durum.deste,
             zorlukIndeksleri(deste, durum.ayarlar.zorlukModu),
+            Math.random,
+            durum.ayarlar.altinKart ? altinAdaylari(deste) : [],
           ),
           seriBittiSoruluyor: false,
           sayac: devamEt(durum.sayac),
@@ -430,6 +538,10 @@ export const oyunDeposu = create<OyunDurumu>()(
           seriBittiSoruluyor: false,
           cikisSoruluyor: false,
           geriAlinacak: null,
+          aktifTurCesidi: null,
+          isinmaAktif: false,
+          oynananTur: 0,
+          aktifKartAltin: false,
         })),
 
       yeniOyun: () => {
@@ -440,11 +552,14 @@ export const oyunDeposu = create<OyunDurumu>()(
       name: 'nafutabu-oyun',
       storage: createJSONStorage(() => AsyncStorage),
       /**
-       * Surum 1: takimlara birikimli sayaclar, ayarlara zorluk ve sol el
-       * eklendi. Diskteki eski kayitta bu alanlar yok - dokunulmazsa
-       * kazanan ekrani t.toplam.dogru okurken cokerdi.
+       * Surum 1: takimlara birikimli sayaclar, ayarlara zorluk ve sol el.
+       * Surum 2: takimlara handikap, ayarlara ozel tur / isinma / altin
+       * kart, destelere altin indeksleri, gecmis oyun listesi.
+       *
+       * Diskteki eski kayitta bu alanlar yok. Dokunulmazsa kazanan ekrani
+       * t.toplam.dogru okurken, tur ekrani deste.altinlar okurken cokerdi.
        */
-      version: 1,
+      version: 2,
       migrate: (kayit) => {
         const eski = kayit as Partial<OyunDurumu> | undefined;
         if (!eski) return {} as OyunDurumu;
@@ -455,7 +570,11 @@ export const oyunDeposu = create<OyunDurumu>()(
             ...t,
             toplam: t.toplam ?? BOS_TUR,
             enIyiTur: t.enIyiTur ?? 0,
+            handikap: t.handikap ?? false,
           })),
+          deste: eski.deste ? { ...eski.deste, altinlar: eski.deste.altinlar ?? [] } : null,
+          gecmisOyunlar: eski.gecmisOyunlar ?? [],
+          oynananTur: eski.oynananTur ?? 0,
         } as OyunDurumu;
       },
       // Zamanlayici ve gecici durumlar kaydedilmez
@@ -466,6 +585,8 @@ export const oyunDeposu = create<OyunDurumu>()(
         deste: d.deste,
         kendiKartlar: d.kendiKartlar,
         bildirilenler: d.bildirilenler,
+        gecmisOyunlar: d.gecmisOyunlar,
+        oynananTur: d.oynananTur,
       }),
     },
   ),
@@ -520,6 +641,7 @@ function kartiIlerlet(
   ayarla({
     deste: sonuc.durum,
     aktifKart: kartiGetir(kartlar, sonuc.indeks),
+    aktifKartAltin: altinMi(sonuc.durum, sonuc.indeks),
     sonOlay: { tur: 'kartDegisti' },
   });
 }
@@ -572,4 +694,24 @@ export function anlaticiSirasiSec(durum: OyunDurumu): { sira: number; toplam: nu
     sira: (takim.anlatanSira % takim.oyuncular.length) + 1,
     toplam: takim.oyuncular.length,
   };
+}
+
+/**
+ * Bu tur ozel bir cesit gelecek mi.
+ *
+ * Puanlama degismez - yalnizca anlatma bicimi degisir. Cesit sirayla
+ * dolasir, boylece hep ayni cesit gelmez ve oyuncular dordunu de gorur.
+ */
+export function turCesidiSec(ayarlar: Ayarlar, oynananTur: number): TurCesidi | null {
+  if (ayarlar.turCesidiSikligi === 'kapali') return null;
+  const arayis = ayarlar.turCesidiSikligi === 'her3' ? 3 : 5;
+  const sira = oynananTur + 1;
+  if (sira % arayis !== 0) return null;
+  const dizin = Math.floor(sira / arayis - 1) % TUR_CESITLERI.length;
+  return TUR_CESITLERI[dizin] ?? null;
+}
+
+/** Son duzlukte miyiz - biri hedefe ulasti ama herkes esit tur oynamadi. */
+export function sonDuzlukteMiSec(durum: OyunDurumu): boolean {
+  return sonDuzluktenMi(durum.takimlar, durum.ayarlar);
 }

@@ -54,6 +54,12 @@ export type Takim = {
   toplam: TurSayaclari;
   /** Tek turda alinan en yuksek puan. */
   enIyiTur: number;
+  /**
+   * Handikap. Cocuklar ve teknolojiye uzak buyukler icin.
+   * Ek saniye vermek yerine tur suresi 1.5 katina cikar - boylece
+   * ayarlanan sure ne olursa olsun oran ayni kalir.
+   */
+  handikap: boolean;
 };
 
 export type BitisModu = 'puan' | 'tur' | 'sinirsiz';
@@ -73,6 +79,47 @@ export const ZORLUK_ARALIKLARI: Record<ZorlukModu, readonly number[]> = {
   karisik: [1, 2, 3, 4, 5],
   zor: [3, 4, 5],
 };
+
+/**
+ * Tur cesitleri. Puanlama ayni kalir, yalnizca ANLATMA bicimi degisir -
+ * boylece heyecan artar ama denge bozulmaz.
+ */
+export type TurCesidi = 'tekKelime' | 'sessiz' | 'ters' | 'hizli';
+
+export type TurCesidiSikligi = 'kapali' | 'her3' | 'her5';
+
+export const TUR_CESIDI_BILGI: Record<
+  TurCesidi,
+  { ad: string; aciklama: string; ikon: string }
+> = {
+  tekKelime: {
+    ad: 'Tek Kelime',
+    aciklama: 'Her kart için tek bir kelime ipucu verebilirsin. Tek kelime.',
+    ikon: 'feather',
+  },
+  sessiz: {
+    ad: 'Sessiz Tur',
+    aciklama: 'Konuşmak yok. Sadece el kol hareketi. Yasaklılar yine geçerli.',
+    ikon: 'users',
+  },
+  ters: {
+    ad: 'Ters Tur',
+    aciklama: 'Takımın anlatır, sen tahmin edersin. Ekrana sen bakma.',
+    ikon: 'shuffle',
+  },
+  hizli: {
+    ad: 'Hızlı Tur',
+    aciklama: 'Süre yarıya iner. Aynı puan, yarım zaman.',
+    ikon: 'timer',
+  },
+};
+
+export const TUR_CESITLERI: readonly TurCesidi[] = [
+  'tekKelime',
+  'sessiz',
+  'ters',
+  'hizli',
+];
 
 export const ZORLUK_ETIKETLERI: Record<ZorlukModu, string> = {
   cocuk: 'Çocuk',
@@ -94,6 +141,12 @@ export type Ayarlar = {
   zorlukModu: ZorlukModu;
   /** Aksiyon butonlarini ters cevirir - sol elle tutanlar icin. */
   solElModu: boolean;
+  /** Ozel tur cesitlerinin sikligi. Kapali varsayilan. */
+  turCesidiSikligi: TurCesidiSikligi;
+  /** Oyunun ilk turu puansiz deneme turu olsun mu. */
+  isinmaTuru: boolean;
+  /** Altin kart acik mi. Destenin %2'si, yalnizca zor kelimelerden. */
+  altinKart: boolean;
 };
 
 export const VARSAYILAN_AYARLAR: Ayarlar = {
@@ -109,6 +162,9 @@ export const VARSAYILAN_AYARLAR: Ayarlar = {
   isimlerAcik: false,
   zorlukModu: 'karisik',
   solElModu: false,
+  turCesidiSikligi: 'kapali',
+  isinmaTuru: false,
+  altinKart: false,
 };
 
 /** Ayar ekranlarindaki secenek listeleri. */
@@ -117,6 +173,19 @@ export const PAS_SECENEKLERI = [0, 1, 2, 3, 4, 5] as const;
 export const PUAN_SECENEKLERI = [10, 15, 20, 25, 30, 40] as const;
 export const TUR_SECENEKLERI = [5, 7, 9, 11, 13, 15] as const;
 export const SON_KART_SURE_SECENEKLERI = [3, 5, 10] as const;
+
+/** Handikapli takimin tur suresi. Oran sabit, ek saniye yok. */
+export const HANDIKAP_CARPANI = 1.5;
+
+export function takimSuresi(sure: number, handikap: boolean): number {
+  return handikap ? Math.round(sure * HANDIKAP_CARPANI) : sure;
+}
+
+/** Altin kart destenin yuzde kaci. */
+export const ALTIN_ORANI = 0.02;
+
+/** Altin kart puani. Simetrik - dogru +2, yanlis -2. */
+export const ALTIN_PUAN = 2;
 
 /** Bir turda islenen kart sonuclari. */
 export type TurSayaclari = {

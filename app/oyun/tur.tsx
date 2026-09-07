@@ -25,6 +25,8 @@ import { SureHalkasi } from '../../src/arayuz/SureHalkasi';
 import { Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
 import { anlatanAdiSec, geriAlinabilirMiSec, oyunDeposu } from '../../src/oyun/durum';
+import { TUR_CESIDI_BILGI } from '../../src/oyun/tipler';
+import { Ikon } from '../../src/cizimler/Ikon';
 import { kategoriBul } from '../../src/oyun/kategoriler';
 import { kalanKart } from '../../src/oyun/deste';
 import { sesCal } from '../../src/oyun/sesler';
@@ -60,6 +62,9 @@ export default function TurEkrani() {
   const geriAlinabilir = oyunDeposu(geriAlinabilirMiSec);
   const geriAl = oyunDeposu((d) => d.geriAl);
   const kartBildir = oyunDeposu((d) => d.kartBildir);
+  const aktifKartAltin = oyunDeposu((d) => d.aktifKartAltin);
+  const aktifTurCesidi = oyunDeposu((d) => d.aktifTurCesidi);
+  const isinmaAktif = oyunDeposu((d) => d.isinmaAktif);
 
   /**
    * Bunlar ref degil state olmali. Ref degisimi yeniden cizim
@@ -135,6 +140,24 @@ export default function TurEkrani() {
             <Yazi tur="kalin" boyut={BOYUT.kucuk} renk={RENK.sis} numberOfLines={1}>
               {`${anlatan}  ·  ${deste ? kalanKart(deste) : 0} kart kaldı`}
             </Yazi>
+            {/* Ozel tur ve isinma turu surekli gorunur - kural unutulmasin */}
+            {aktifTurCesidi || isinmaAktif ? (
+              <View style={durum.cesitBant}>
+                {aktifTurCesidi ? (
+                  <Ikon
+                    ad={TUR_CESIDI_BILGI[aktifTurCesidi].ikon}
+                    boyut={12}
+                    renk={RENK.pirinc}
+                    cizgiKalinligi={2.6}
+                  />
+                ) : null}
+                <Yazi tur="cokKalin" boyut={BOYUT.minik} renk={RENK.pirinc} harfAraligi={1}>
+                  {aktifTurCesidi
+                    ? trUpper(TUR_CESIDI_BILGI[aktifTurCesidi].ad)
+                    : 'ISINMA · PUANSIZ'}
+                </Yazi>
+              </View>
+            ) : null}
           </View>
           <SureHalkasi
             kalanSaniye={sayac.kalanSaniye}
@@ -151,6 +174,7 @@ export default function TurEkrani() {
               sonKartMi={sayac.sonKartModuAktif}
               pasTuruMu={deste?.pasTuruAktif ?? false}
               cevirmeAnahtari={kartSayaci}
+              altinMi={aktifKartAltin}
               onUzunBas={() => {
                 if (!kart) return;
                 kartBildir(kart);
@@ -242,6 +266,17 @@ const durum = StyleSheet.create({
     marginBottom: BOSLUK.notr + 2,
   },
   baslikAlani: { flex: 1, gap: 3 },
+  cesitBant: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    alignSelf: 'flex-start',
+    marginTop: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: YARICAP.tam,
+    backgroundColor: 'rgba(212,160,80,0.16)',
+  },
   kartAlani: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   bildirim: {
     position: 'absolute',

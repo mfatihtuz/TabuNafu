@@ -32,9 +32,13 @@ export default function KazananEkrani() {
   const beraberlik = kazanan.length > 1;
   const enYuksek = kazanan[0]?.puan ?? 0;
 
+  const oyunuKaydet = oyunDeposu((d) => d.oyunuKaydet);
+
   useEffect(() => {
     sesCal('dogru', sesAcik);
-  }, [sesAcik]);
+    // Tabloyu gecmise yaz - sonuc ekrani yanlislikla gecilirse kaybolmasin
+    oyunuKaydet();
+  }, [sesAcik, oyunuKaydet]);
 
   return (
     <Zemin>

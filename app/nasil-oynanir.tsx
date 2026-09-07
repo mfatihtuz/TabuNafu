@@ -51,6 +51,26 @@ const KURALLAR: readonly { ikon: string; baslik: string; metin: string }[] = [
     metin: 'Korna çalar. Son kart hakkı açıksa ekrandaki kart için birkaç saniyen daha olur, o sırada pas kilitlidir.',
   },
   {
+    ikon: 'trophy',
+    baslik: 'Son düzlük',
+    metin: 'Bir takım hedefe ulaşınca oyun hemen bitmez. Sıra başa dönene kadar herkes eşit tur oynar, sonra kazanan belli olur.',
+  },
+  {
+    ikon: 'timer',
+    baslik: 'Ek süre',
+    metin: 'Küçükler ve oyuna uzak büyükler için takım kurulumundan ek süre açılır. O takımın turu bir buçuk kat uzar.',
+  },
+  {
+    ikon: 'shuffle',
+    baslik: 'Özel turlar',
+    metin: 'Ayarlardan açarsan araya Tek Kelime, Sessiz, Ters ve Hızlı turlar girer. Puanlama aynı kalır, sadece anlatma biçimi değişir.',
+  },
+  {
+    ikon: 'shapes',
+    baslik: 'Altın kart',
+    metin: 'Açılırsa destenin yüzde ikisi altın olur. Doğru +2, yanlış −2. Yalnızca zor kelimelerden seçilir.',
+  },
+  {
     ikon: 'chevron-left',
     baslik: 'Yanlışlıkla bastıysan',
     metin: 'Butonların üstünde beliren Son basışı geri al ile düzeltirsin. Puan, sayaç ve kart birlikte geri sarılır.',

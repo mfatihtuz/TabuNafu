@@ -60,7 +60,11 @@ export function Modal3D({
           <Yazi boyut={BOYUT.notr} renk={RENK.sis} ortala>{metin}</Yazi>
 
           <View style={durum.butonlar}>
-            <Buton metin={birinci} titresimAcik={titresimAcik} onPress={onBirinci} />
+            {/* Bos etiketli buton cizilmez - cark gibi kendiliginden
+                kapanan pencerelerde dugmeye gerek yok */}
+            {birinci ? (
+              <Buton metin={birinci} titresimAcik={titresimAcik} onPress={onBirinci} />
+            ) : null}
             {ikinci && onIkinci ? (
               <Buton metin={ikinci} ikincil titresimAcik={titresimAcik} onPress={onIkinci} />
             ) : null}

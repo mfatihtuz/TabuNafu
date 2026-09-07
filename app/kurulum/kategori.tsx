@@ -6,7 +6,7 @@
  */
 
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -16,11 +16,12 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { GeriButonu } from '../../src/arayuz/Buton';
+import { Modal3D } from '../../src/arayuz/Modal3D';
 import { Yazi } from '../../src/arayuz/Yazi';
 import { Zemin } from '../../src/arayuz/Zemin';
 import { Ikon } from '../../src/cizimler/Ikon';
 import { oyunDeposu } from '../../src/oyun/durum';
-import { KARISIK, KATEGORILER, KENDI, kartSayisi } from '../../src/oyun/kategoriler';
+import { KARISIK, KATEGORILER, KENDI, kartSayisi, kategoriBul } from '../../src/oyun/kategoriler';
 import type { Kategori } from '../../src/oyun/tipler';
 import { BOSLUK, PANEL, YARICAP } from '../../src/tema/golgeler';
 import { RENK } from '../../src/tema/renkler';
@@ -55,6 +56,27 @@ export default function KategoriEkrani() {
   }, [zorlukModu]);
 
   const kendiSayi = kartSayisi(KENDI.kimlik, zorlukModu, kendiKartlar);
+
+  /**
+   * Kategori ruleti. Kimse "ben cografya bilmem" diye kacamiyor.
+   * Kisa bir donme animasyonu, sonra rastgele kategori secilir.
+   */
+  const [cark, setCark] = useState<string | null>(null);
+
+  function carkiDondur() {
+    const havuz = KATEGORILER.map((k) => k.kimlik);
+    let adim = 0;
+    const z = setInterval(() => {
+      setCark(havuz[Math.floor(Math.random() * havuz.length)] ?? null);
+      adim++;
+      if (adim >= 12) {
+        clearInterval(z);
+        const secilen = havuz[Math.floor(Math.random() * havuz.length)]!;
+        setCark(secilen);
+        setTimeout(() => { setCark(null); sec(secilen); }, 520);
+      }
+    }, 90);
+  }
 
   function sec(kimlik: string) {
     kategoriSec(kimlik);
@@ -93,6 +115,23 @@ export default function KategoriEkrani() {
             />
           ) : null}
 
+          <Pressable
+            onPress={carkiDondur}
+            style={durum.karisik}
+            accessibilityRole="button"
+            accessibilityLabel="Kategori çarkını döndür"
+          >
+            <View style={[durum.disk, { backgroundColor: RENK.mavi }]}>
+              <Ikon ad="dices" boyut={25} renk={RENK.beyaz} cizgiKalinligi={2.2} />
+            </View>
+            <View style={durum.karisikMetin}>
+              <Yazi tur="cokKalin" boyut={BOYUT.govde}>ÇARKI ÇEVİR</Yazi>
+              <Yazi boyut={BOYUT.kucuk} renk={RENK.sis}>
+                Kategoriyi şans seçsin
+              </Yazi>
+            </View>
+          </Pressable>
+
           <Pressable onPress={() => sec(KARISIK.kimlik)} style={durum.karisik}
                      accessibilityRole="button" accessibilityLabel="Karışık kategori">
             <View style={[durum.disk, { backgroundColor: RENK.pirinc }]}>
@@ -107,6 +146,17 @@ export default function KategoriEkrani() {
           </Pressable>
         </ScrollView>
       </View>
+
+      {/* Cark donerken kategori adlari hizla degisir - gerilim burada */}
+      <Modal3D
+        acik={cark !== null}
+        ikon="dices"
+        ikonRenk={RENK.mavi}
+        baslik={cark ? kategoriBul(cark).ad : ''}
+        metin="Çark dönüyor..."
+        birinci=""
+        onBirinci={() => {}}
+      />
     </Zemin>
   );
 }

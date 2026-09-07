@@ -18,7 +18,7 @@
  *      korunur.
  */
 
-import type { HamKart, Kart } from './tipler';
+import { ALTIN_ORANI, type HamKart, type Kart } from './tipler';
 import { hamKartiCevir } from './tipler';
 
 export type DesteDurumu = {
@@ -32,6 +32,8 @@ export type DesteDurumu = {
   readonly pasTuruAktif: boolean;
   /** En son gosterilen kartin indeksi. Yeniden karmada ilk kart bu olamaz. */
   readonly sonGosterilen: number | null;
+  /** Altin kart indeksleri. Ayar kapaliysa bos kalir. */
+  readonly altinlar: readonly number[];
 };
 
 export type CekimSonucu =
@@ -84,15 +86,44 @@ export function desteKur(
   kategoriKimlik: string,
   kaynak: DesteKaynagi,
   rastgele: Rastgele = Math.random,
+  altinAdaylar: readonly number[] = [],
 ): DesteDurumu {
+  const sira = diziKaristir(indeksleriCoz(kaynak), null, rastgele);
   return {
     kategoriKimlik,
-    sira: diziKaristir(indeksleriCoz(kaynak), null, rastgele),
+    sira,
     imlec: 0,
     pasListesi: [],
     pasTuruAktif: false,
     sonGosterilen: null,
+    altinlar: altinlariSec(sira, altinAdaylar, rastgele),
   };
+}
+
+/**
+ * Altin kartlari secer.
+ *
+ * Destenin %2'si kadar kart, YALNIZCA aday listesinden (zor ve cok zor
+ * kelimeler) secilir. Kolay bir kelimeye iki puan vermek dengeyi bozardi -
+ * altin kart risk almanin karsiligi olmali.
+ */
+export function altinlariSec(
+  sira: readonly number[],
+  adaylar: readonly number[],
+  rastgele: Rastgele = Math.random,
+): number[] {
+  if (adaylar.length === 0 || sira.length === 0) return [];
+  const adayKume = new Set(adaylar);
+  const destedeki = sira.filter((i) => adayKume.has(i));
+  if (destedeki.length === 0) return [];
+
+  const adet = Math.max(1, Math.round(sira.length * ALTIN_ORANI));
+  return diziKaristir(destedeki, null, rastgele).slice(0, adet);
+}
+
+/** Bu kart altin mi. */
+export function altinMi(durum: DesteDurumu, indeks: number): boolean {
+  return durum.altinlar.includes(indeks);
 }
 
 export function desteBittiMi(durum: DesteDurumu): boolean {
@@ -156,14 +187,17 @@ export function yenidenKaristir(
   durum: DesteDurumu,
   kaynak: DesteKaynagi,
   rastgele: Rastgele = Math.random,
+  altinAdaylar: readonly number[] = [],
 ): DesteDurumu {
+  const yeniSira = diziKaristir(indeksleriCoz(kaynak), durum.sonGosterilen, rastgele);
   return {
     kategoriKimlik: durum.kategoriKimlik,
-    sira: diziKaristir(indeksleriCoz(kaynak), durum.sonGosterilen, rastgele),
+    sira: yeniSira,
     imlec: 0,
     pasListesi: [],
     pasTuruAktif: false,
     sonGosterilen: durum.sonGosterilen,
+    altinlar: altinlariSec(yeniSira, altinAdaylar, rastgele),
   };
 }
 

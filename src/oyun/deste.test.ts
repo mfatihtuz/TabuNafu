@@ -10,6 +10,7 @@ import { describe, it } from 'node:test';
 
 import {
   desteBittiMi,
+  altinlariSec,
   desteKur,
   diziKaristir,
   kalanKart,
@@ -18,6 +19,7 @@ import {
   yenidenKaristir,
   type DesteDurumu,
 } from './deste';
+import { takimSuresi } from './tipler';
 
 /** Deterministik sozde rastgele - testler her calistirmada ayni sonucu versin. */
 function sabitRastgele(tohum = 12345) {
@@ -203,5 +205,42 @@ describe('deste', () => {
     const kopya = [...kaynak];
     diziKaristir(kaynak, null, sabitRastgele());
     assert.deepEqual(kaynak, kopya, 'girdi dizisi degismemeli');
+  });
+});
+
+describe('altin kart secimi', () => {
+  it('yalnizca aday listesinden secer - kolay kelime altin olamaz', () => {
+    const sira = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const adaylar = [2, 5, 8];
+    const altinlar = altinlariSec(sira, adaylar, sabitRastgele());
+    for (const a of altinlar) assert.ok(adaylar.includes(a));
+  });
+
+  it('deste boyunun yaklasik yuzde ikisi kadar altin verir', () => {
+    const sira = Array.from({ length: 250 }, (_, i) => i);
+    const adaylar = sira.filter((i) => i % 4 === 0);
+    const altinlar = altinlariSec(sira, adaylar, sabitRastgele());
+    assert.equal(altinlar.length, 5);
+  });
+
+  it('aday yoksa hic altin kart olmaz', () => {
+    const sira = [0, 1, 2];
+    assert.deepEqual(altinlariSec(sira, [], sabitRastgele()), []);
+  });
+
+  it('ayar kapaliyken deste altinsiz kurulur', () => {
+    const deste = desteKur('genel', 40, sabitRastgele());
+    assert.deepEqual(deste.altinlar, []);
+  });
+});
+
+describe('handikap suresi', () => {
+  it('handikapli takimin suresi bir buçuk kati olur', () => {
+    assert.equal(takimSuresi(60, true), 90);
+    assert.equal(takimSuresi(45, true), 68);
+  });
+
+  it('handikapsiz takimin suresi degismez', () => {
+    assert.equal(takimSuresi(60, false), 60);
   });
 });

@@ -20,6 +20,7 @@ import {
   TUR_SECENEKLERI,
   ZORLUK_ETIKETLERI,
   type BitisModu,
+  type TurCesidiSikligi,
   type ZorlukModu,
 } from '../../src/oyun/tipler';
 import { BOSLUK, SAYFA_YAN, YARICAP } from '../../src/tema/golgeler';
@@ -33,6 +34,12 @@ const MODLAR: readonly { kimlik: BitisModu; etiket: string }[] = [
 ];
 
 const ZORLUKLAR: readonly ZorlukModu[] = ['cocuk', 'karisik', 'zor'];
+
+const CESIT_SIKLIKLARI: readonly { kimlik: TurCesidiSikligi; etiket: string }[] = [
+  { kimlik: 'kapali', etiket: 'Kapalı' },
+  { kimlik: 'her3', etiket: 'Her 3 Tur' },
+  { kimlik: 'her5', etiket: 'Her 5 Tur' },
+];
 
 const ZORLUK_ACIKLAMA: Record<ZorlukModu, string> = {
   cocuk: 'Yalnızca en kolay kelimeler. Küçüklerle oynarken.',
@@ -49,6 +56,7 @@ export default function AyarEkrani() {
   const titresim = ayarlar.titresimAcik;
   const kendiSayi = oyunDeposu((d) => d.kendiKartlar.length);
   const bildirilenSayi = oyunDeposu((d) => d.bildirilenler.length);
+  const gecmisSayi = oyunDeposu((d) => d.gecmisOyunlar.length);
 
   return (
     <Zemin>
@@ -111,6 +119,38 @@ export default function AyarEkrani() {
               </View>
               <Yazi boyut={BOYUT.kucuk} renk={RENK.sis}>
                 {ZORLUK_ACIKLAMA[ayarlar.zorlukModu]}
+              </Yazi>
+            </View>
+          </View>
+
+          <View style={durum.blok}>
+            <View style={[durum.yanBosluklu, durum.blokBasi]}>
+              <UstYazi>ÖZEL TURLAR</UstYazi>
+              <View style={durum.segment}>
+                {CESIT_SIKLIKLARI.map((c) => {
+                  const secili = ayarlar.turCesidiSikligi === c.kimlik;
+                  return (
+                    <Pressable
+                      key={c.kimlik}
+                      onPress={() => ayarGuncelle({ turCesidiSikligi: c.kimlik })}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: secili }}
+                      style={[durum.segmentDugme, secili && durum.segmentSecili]}
+                    >
+                      <Yazi
+                        tur="cokKalin"
+                        boyut={BOYUT.notr - 0.5}
+                        renk={secili ? RENK.pirincUstu : RENK.sis}
+                      >
+                        {c.etiket}
+                      </Yazi>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <Yazi boyut={BOYUT.kucuk} renk={RENK.sis}>
+                Tek Kelime, Sessiz, Ters ve Hızlı turlar sırayla gelir.
+                Puanlama değişmez, yalnızca anlatma biçimi değişir.
               </Yazi>
             </View>
           </View>
@@ -205,6 +245,20 @@ export default function AyarEkrani() {
               onDegis={(titresimAcik) => ayarGuncelle({ titresimAcik })}
             />
             <Toggle
+              baslik="Isınma Turu"
+              aciklama="Oyunun ilk turu puansız deneme olur. Sıra ilerlemez."
+              acik={ayarlar.isinmaTuru}
+              titresimAcik={titresim}
+              onDegis={(isinmaTuru) => ayarGuncelle({ isinmaTuru })}
+            />
+            <Toggle
+              baslik="Altın Kart"
+              aciklama="Destenin yüzde ikisi altın olur. Doğru +2, yanlış −2. Yalnızca zor kelimelerden seçilir."
+              acik={ayarlar.altinKart}
+              titresimAcik={titresim}
+              onDegis={(altinKart) => ayarGuncelle({ altinKart })}
+            />
+            <Toggle
               baslik="Sol El Modu"
               aciklama="Doğru ve yanlış butonlarının yeri değişir."
               acik={ayarlar.solElModu}
@@ -220,6 +274,13 @@ export default function AyarEkrani() {
             ikon="feather"
             onPress={() => yonlendir.push('/kurulum/kelimelerim')}
           />
+          {gecmisSayi > 0 ? (
+            <BagButonu
+              metin={`Geçmiş oyunlar (${gecmisSayi})`}
+              ikon="trophy"
+              onPress={() => yonlendir.push('/kurulum/gecmis')}
+            />
+          ) : null}
           {bildirilenSayi > 0 ? (
             <BagButonu
               metin={`Bildirilen kartlar (${bildirilenSayi})`}

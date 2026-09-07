@@ -13,7 +13,9 @@ import {
   oyunBittiMi,
   pasEkle,
   pasHakkiVarMi,
+  altinPuani,
   siraliTakimlar,
+  sonDuzluktenMi,
   turPuani,
   yanlisEkle,
 } from './puanlama';
@@ -22,7 +24,7 @@ import { VARSAYILAN_AYARLAR, type Ayarlar, type Takim } from './tipler';
 function takim(ad: string, puan: number, anlatanSira = 0): Takim {
   return {
     ad, renk: '#E01E37', puan, oyuncular: [], anlatanSira,
-    toplam: BOS_TUR, enIyiTur: 0,
+    toplam: BOS_TUR, enIyiTur: 0, handikap: false,
   };
 }
 
@@ -115,5 +117,47 @@ describe('puanlama', () => {
     const sirali = siraliTakimlar(liste);
     assert.deepEqual(sirali.map((t) => t.ad), ['Mavi', 'Sarı', 'Kırmızı']);
     assert.equal(liste[0]?.ad, 'Kırmızı', 'girdi dizisi degismemeli');
+  });
+});
+
+describe('son duzluk', () => {
+  const puanModu = { ...VARSAYILAN_AYARLAR, bitisModu: 'puan' as const, hedefPuan: 30 };
+
+  it('hedefe ulasan takim tek basina oyunu bitiremez', () => {
+    // Ilk takim 5 tur oynayip 30'a ulasti, ikinci takim henuz 4 turda.
+    // Sirf once oynadigi icin kazanmak adil degil.
+    const takimlar = [takim('A', 30, 5), takim('B', 22, 4)];
+    assert.equal(oyunBittiMi(takimlar, puanModu), false);
+  });
+
+  it('herkes esit tur oynayinca biter', () => {
+    const takimlar = [takim('A', 30, 5), takim('B', 22, 5)];
+    assert.equal(oyunBittiMi(takimlar, puanModu), true);
+  });
+
+  it('son duzluk yalnizca hedef gecildiginde ve turlar esit degilken bildirilir', () => {
+    assert.equal(sonDuzluktenMi([takim('A', 30, 5), takim('B', 22, 4)], puanModu), true);
+    assert.equal(sonDuzluktenMi([takim('A', 30, 5), takim('B', 22, 5)], puanModu), false);
+    assert.equal(sonDuzluktenMi([takim('A', 12, 5), takim('B', 9, 4)], puanModu), false);
+  });
+
+  it('geriden gelen takim son duzlukte hala kazanabilir', () => {
+    // A hedefi gecti ama B son turunda onu geciyor
+    const takimlar = [takim('A', 30, 5), takim('B', 33, 5)];
+    assert.equal(oyunBittiMi(takimlar, puanModu), true);
+    assert.deepEqual(kazananlar(takimlar).map((t) => t.ad), ['B']);
+  });
+});
+
+describe('altin kart puani', () => {
+  it('simetrik: dogru +2, yanlis -2, pas 0', () => {
+    assert.equal(altinPuani('dogru'), 2);
+    assert.equal(altinPuani('yanlis'), -2);
+    assert.equal(altinPuani('pas'), 0);
+  });
+
+  it('normal puanin tam iki kati - tek tarafli avantaj yok', () => {
+    assert.equal(altinPuani('dogru'), aksiyonPuani('dogru') * 2);
+    assert.equal(altinPuani('yanlis'), aksiyonPuani('yanlis') * 2);
   });
 });

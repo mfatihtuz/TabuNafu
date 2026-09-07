@@ -38,6 +38,8 @@ type Ozellikler = {
   yasaklilar: readonly string[];
   sonKartMi?: boolean;
   pasTuruMu?: boolean;
+  /** Altin kart - iki puan degerinde. Cerceve ve rozet degisir. */
+  altinMi?: boolean;
   /** Her degistiginde kart cevrilir. */
   cevirmeAnahtari: number;
   /**
@@ -60,6 +62,7 @@ export function Kart3D({
   yasaklilar,
   sonKartMi = false,
   pasTuruMu = false,
+  altinMi = false,
   cevirmeAnahtari,
   onUzunBas,
 }: Ozellikler) {
@@ -83,7 +86,7 @@ export function Kart3D({
     ],
   }));
 
-  const rozetVar = sonKartMi || pasTuruMu;
+  const rozetVar = sonKartMi || pasTuruMu || altinMi;
 
   return (
     <Animated.View
@@ -91,10 +94,26 @@ export function Kart3D({
         durum.kart,
         KART_GOLGE,
         sonKartMi && durum.kartSonKart,
+        altinMi && durum.kartAltin,
         govdeStil,
       ]}
     >
-      <View style={[durum.bant, sonKartMi && { backgroundColor: RENK.yanlis }]} />
+      <View
+        style={[
+          durum.bant,
+          sonKartMi && { backgroundColor: RENK.yanlis },
+          altinMi && !sonKartMi && { backgroundColor: RENK.pirinc },
+        ]}
+      />
+
+      {altinMi ? (
+        <View style={[durum.rozet, durum.rozetAltin]}>
+          <Yazi tur="cokKalin" boyut={BOYUT.minik - 0.5}
+                renk={RENK.pirincUstu} harfAraligi={1.7}>
+            ALTIN KART · İKİ PUAN
+          </Yazi>
+        </View>
+      ) : null}
 
       {pasTuruMu ? (
         <View style={[durum.rozet, durum.rozetPas]}>
@@ -180,6 +199,10 @@ const durum = StyleSheet.create({
     borderWidth: 4,
     borderColor: RENK.yanlis,
   },
+  kartAltin: {
+    borderWidth: 4,
+    borderColor: RENK.pirinc,
+  },
   bant: {
     height: 13,
     backgroundColor: RENK.kartBant,
@@ -216,6 +239,7 @@ const durum = StyleSheet.create({
     zIndex: 2,
   },
   rozetPas: { backgroundColor: RENK.pas },
+  rozetAltin: { backgroundColor: RENK.pirinc },
   rozetSon: { backgroundColor: RENK.yanlis },
   // Ikisi ayni anda gorunurse son kart rozeti asagi iner
   rozetAlt: { top: undefined, bottom: 18 },

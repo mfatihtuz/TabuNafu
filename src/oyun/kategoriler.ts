@@ -156,3 +156,18 @@ export function kartSayisi(
 ): number {
   return zorlukIndeksleri(desteyiYukle(kategoriKimlik, kendiKartlar), mod).length;
 }
+
+/**
+ * Altin kart adaylari - yalnizca zor (4) ve cok zor (5) kelimeler.
+ *
+ * Kolay bir kelimeye iki puan vermek dengeyi bozardi. Altin kart risk
+ * almanin karsiligi olmali, hediye degil.
+ */
+export function altinAdaylari(deste: readonly HamKart[]): number[] {
+  const adaylar: number[] = [];
+  for (let i = 0; i < deste.length; i++) {
+    const zorluk = deste[i]![6];
+    if (zorluk >= 4) adaylar.push(i);
+  }
+  return adaylar;
+}
